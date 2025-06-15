@@ -40,7 +40,6 @@
 
         body {
             background-color: #1a1a2e;
-            background-image: url('aatma-background.png');
             background-size: cover;
             background-position: center top;
             background-repeat: no-repeat;
@@ -939,20 +938,24 @@
             }
         });
         
-        // Background image error handling
-        window.addEventListener('load', () => {
+        // Background image loading with cache busting
+        window.addEventListener('DOMContentLoaded', () => {
+            const timestamp = Date.now();
+            const imageUrl = `aatma-background.png?v=${timestamp}`;
+            
             const testImg = new Image();
             testImg.onload = () => {
                 console.log('Background image loaded successfully');
-                document.body.style.backgroundImage = 'url("aatma-background.png")';
+                document.body.style.backgroundImage = `url("${imageUrl}")`;
                 document.body.style.backgroundSize = 'cover';
                 document.body.style.backgroundPosition = 'center top';
+                document.body.style.backgroundRepeat = 'no-repeat';
             };
             testImg.onerror = () => {
                 console.log('Background image failed to load - using gradient fallback');
                 document.body.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
             };
-            testImg.src = 'aatma-background.png';
+            testImg.src = imageUrl;
         });
     </script>
 </body>
