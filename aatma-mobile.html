@@ -40,11 +40,11 @@
 
         body {
             background-color: #1a1a2e;
-            background-image: url('./aatma-background.png'), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-image: url('aatma-background.png'), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             background-size: cover, cover;
             background-position: center center, center center;
             background-repeat: no-repeat, no-repeat;
-            background-attachment: fixed, fixed;
+            background-attachment: scroll, fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             user-select: none;
@@ -459,6 +459,17 @@
             font-size: 1.2rem;
         }
 
+        .tab-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
         /* Prevent zoom on input focus */
         input, select, textarea, button {
             font-size: 16px;
@@ -470,50 +481,76 @@
 
 
         <div class="main-content">
-            <div class="sensor-layout">
-                <div class="left-scanner">
-                    <div class="scanner-track">
-                        <div class="progress-dot" id="progressDot"></div>
+            <!-- Scan Tab Content -->
+            <div class="tab-content" id="tab0">
+                <div class="sensor-layout">
+                    <div class="left-scanner">
+                        <div class="scanner-track">
+                            <div class="progress-dot" id="progressDot"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="right-emf">
+                        <div class="emf-lights" id="emfLights">
+                            <div class="emf-light green"></div>
+                            <div class="emf-light green"></div>
+                            <div class="emf-light green"></div>
+                            <div class="emf-light yellow"></div>
+                            <div class="emf-light yellow"></div>
+                            <div class="emf-light orange"></div>
+                            <div class="emf-light orange"></div>
+                            <div class="emf-light red"></div>
+                            <div class="emf-light red"></div>
+                            <div class="emf-light red"></div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="right-emf">
-                    <div class="emf-lights" id="emfLights">
-                        <div class="emf-light green"></div>
-                        <div class="emf-light green"></div>
-                        <div class="emf-light green"></div>
-                        <div class="emf-light yellow"></div>
-                        <div class="emf-light yellow"></div>
-                        <div class="emf-light orange"></div>
-                        <div class="emf-light orange"></div>
-                        <div class="emf-light red"></div>
-                        <div class="emf-light red"></div>
-                        <div class="emf-light red"></div>
+
+                <div class="word-display" id="wordDisplay">
+                    <div class="current-word" id="currentWord"></div>
+                    <div class="word-category" id="wordCategory"></div>
+                </div>
+
+                <div class="sensitivity-section">
+                    <div class="sensitivity-controls">
+                        <button class="sensitivity-btn" onclick="adjustSensitivity(-10)">-</button>
+                        <div class="sensitivity-bar">
+                            <div class="sensitivity-fill" id="sensitivityFill" style="width: 50%"></div>
+                        </div>
+                        <button class="sensitivity-btn" onclick="adjustSensitivity(10)">+</button>
+                        <div class="sensitivity-value" id="sensitivityValue">50%</div>
                     </div>
+                </div>
+
+                <button class="scan-button" id="scanButton" onclick="toggleScanning()">SCAN</button>
+            </div>
+
+            <!-- History Tab Content -->
+            <div class="tab-content hidden" id="tab1">
+                <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Session History</h2>
+                <div id="historyList" style="padding: 10px;">
+                    <p style="color: var(--text-secondary); text-align: center;">No sessions recorded yet</p>
                 </div>
             </div>
 
-            <div class="word-display" id="wordDisplay">
-                <div class="current-word" id="currentWord"></div>
-                <div class="word-category" id="wordCategory"></div>
-            </div>
-
-            <!-- Session stats and barometer hidden but data still collected for history -->
-
-            <div class="sensitivity-section">
-                <div class="sensitivity-controls">
-                    <button class="sensitivity-btn" onclick="adjustSensitivity(-10)">-</button>
-                    <div class="sensitivity-bar">
-                        <div class="sensitivity-fill" id="sensitivityFill" style="width: 50%"></div>
-                    </div>
-                    <button class="sensitivity-btn" onclick="adjustSensitivity(10)">+</button>
-                    <div class="sensitivity-value" id="sensitivityValue">50%</div>
+            <!-- Words Tab Content -->
+            <div class="tab-content hidden" id="tab2">
+                <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Word Bank</h2>
+                <div style="padding: 10px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 10px;">Current Language: English</p>
+                    <p style="color: var(--text-secondary);">50,000+ words across 7 languages available for paranormal communication</p>
                 </div>
             </div>
 
-
-
-            <button class="scan-button" id="scanButton" onclick="toggleScanning()">SCAN</button>
+            <!-- Settings Tab Content -->
+            <div class="tab-content hidden" id="tab3">
+                <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Settings</h2>
+                <div style="padding: 10px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 10px;">Language: English</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 10px;">Sensitivity: 50%</p>
+                    <p style="color: var(--text-secondary);">Version: Mobile v1.0</p>
+                </div>
+            </div>
         </div>
         
         <div class="navigation">
@@ -868,13 +905,24 @@
         
         function switchTab(index) {
             try {
+                // Hide all tab content
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+                
+                // Show selected tab content
+                const selectedTab = document.getElementById(`tab${index}`);
+                if (selectedTab) {
+                    selectedTab.classList.remove('hidden');
+                }
+                
                 // Remove active class from all nav items
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                // Add active class to selected tab
+                
+                // Add active class to selected nav item
                 const navItems = document.querySelectorAll('.nav-item');
                 if (navItems[index]) {
                     navItems[index].classList.add('active');
                 }
+                
                 console.log('Tab switched to:', index);
             } catch (error) {
                 console.log('Tab switch error:', error);
@@ -894,9 +942,15 @@
         // Background image error handling
         window.addEventListener('load', () => {
             const testImg = new Image();
-            testImg.onload = () => console.log('Background image loaded');
-            testImg.onerror = () => console.log('Background image failed to load');
-            testImg.src = './aatma-background.png';
+            testImg.onload = () => {
+                console.log('Background image loaded successfully');
+                document.body.style.backgroundImage = 'url("aatma-background.png"), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+            };
+            testImg.onerror = () => {
+                console.log('Background image failed to load - using gradient fallback');
+                document.body.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+            };
+            testImg.src = 'aatma-background.png';
         });
     </script>
 </body>
