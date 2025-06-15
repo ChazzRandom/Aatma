@@ -40,14 +40,48 @@
 
         body {
             background-color: #1a1a2e;
-            background-size: cover;
-            background-position: center top;
-            background-repeat: no-repeat;
-            background-attachment: scroll;
             color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: var(--user-font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
             user-select: none;
             -webkit-user-select: none;
+            position: relative;
+        }
+
+        .font-selector, .color-selector {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+        }
+
+        .font-option, .color-option {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: var(--text-primary);
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .font-option:hover, .color-option:hover {
+            background: rgba(139, 92, 246, 0.3);
+        }
+
+        .font-option.active, .color-option.active {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
         }
 
         .mobile-container {
@@ -476,6 +510,7 @@
     </style>
 </head>
 <body>
+    <img class="background-image" src="aatma-background.png" alt="AATMA Background">
     <div class="mobile-container">
 
 
@@ -545,9 +580,33 @@
             <div class="tab-content hidden" id="tab3">
                 <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Settings</h2>
                 <div style="padding: 10px;">
-                    <p style="color: var(--text-secondary); margin-bottom: 10px;">Language: English</p>
-                    <p style="color: var(--text-secondary); margin-bottom: 10px;">Sensitivity: 50%</p>
-                    <p style="color: var(--text-secondary);">Version: Mobile v1.0</p>
+                    
+                    <div class="font-selector">
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Font Style</h3>
+                        <button class="font-option active" onclick="changeFont('system')" data-font="system">System Default</button>
+                        <button class="font-option" onclick="changeFont('serif')" data-font="serif" style="font-family: Georgia, serif;">Georgia Serif</button>
+                        <button class="font-option" onclick="changeFont('mono')" data-font="mono" style="font-family: 'Courier New', monospace;">Courier Mono</button>
+                        <button class="font-option" onclick="changeFont('sans')" data-font="sans" style="font-family: Helvetica, Arial, sans-serif;">Helvetica Sans</button>
+                        <button class="font-option" onclick="changeFont('gothic')" data-font="gothic" style="font-family: 'Times New Roman', serif;">Times Gothic</button>
+                        <button class="font-option" onclick="changeFont('modern')" data-font="modern" style="font-family: 'Trebuchet MS', sans-serif;">Trebuchet Modern</button>
+                    </div>
+
+                    <div class="color-selector">
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Text Color</h3>
+                        <button class="color-option active" onclick="changeColor('white')" data-color="white" style="color: #ffffff;">White (Default)</button>
+                        <button class="color-option" onclick="changeColor('purple')" data-color="purple" style="color: #8b5cf6;">Purple</button>
+                        <button class="color-option" onclick="changeColor('cyan')" data-color="cyan" style="color: #06b6d4;">Cyan</button>
+                        <button class="color-option" onclick="changeColor('green')" data-color="green" style="color: #10b981;">Green</button>
+                        <button class="color-option" onclick="changeColor('gold')" data-color="gold" style="color: #f59e0b;">Gold</button>
+                        <button class="color-option" onclick="changeColor('red')" data-color="red" style="color: #ef4444;">Red</button>
+                        <button class="color-option" onclick="changeColor('silver')" data-color="silver" style="color: #94a3b8;">Silver</button>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(139, 92, 246, 0.3);">
+                        <p style="color: var(--text-secondary); margin-bottom: 10px;">Language: English</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 10px;">Sensitivity: 50%</p>
+                        <p style="color: var(--text-secondary);">Version: Mobile v1.0</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -928,9 +987,68 @@
             }
         }
 
+        function changeFont(fontType) {
+            const fontMap = {
+                'system': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+                'serif': 'Georgia, "Times New Roman", serif',
+                'mono': '"Courier New", Monaco, monospace',
+                'sans': 'Helvetica, Arial, sans-serif',
+                'gothic': '"Times New Roman", serif',
+                'modern': '"Trebuchet MS", "Lucida Grande", sans-serif'
+            };
+
+            document.documentElement.style.setProperty('--user-font', fontMap[fontType]);
+            
+            // Update active state
+            document.querySelectorAll('.font-option').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-font="${fontType}"]`).classList.add('active');
+            
+            // Save preference
+            localStorage.setItem('aatma-font', fontType);
+            console.log('Font changed to:', fontType);
+        }
+
+        function changeColor(colorType) {
+            const colorMap = {
+                'white': '#ffffff',
+                'purple': '#8b5cf6',
+                'cyan': '#06b6d4',
+                'green': '#10b981',
+                'gold': '#f59e0b',
+                'red': '#ef4444',
+                'silver': '#94a3b8'
+            };
+
+            document.documentElement.style.setProperty('--text-primary', colorMap[colorType]);
+            
+            // Update active state
+            document.querySelectorAll('.color-option').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-color="${colorType}"]`).classList.add('active');
+            
+            // Save preference
+            localStorage.setItem('aatma-color', colorType);
+            console.log('Color changed to:', colorType);
+        }
+
+        function loadUserPreferences() {
+            const savedFont = localStorage.getItem('aatma-font');
+            const savedColor = localStorage.getItem('aatma-color');
+            
+            if (savedFont) {
+                changeFont(savedFont);
+            }
+            
+            if (savedColor) {
+                changeColor(savedColor);
+            }
+        }
+
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             try {
+                // Load user preferences first
+                loadUserPreferences();
+                
                 aatmaDevice = new AatmaMobile();
                 console.log('Mobile app initialized successfully');
             } catch (error) {
@@ -938,24 +1056,19 @@
             }
         });
         
-        // Background image loading with cache busting
+        // Background image error handling
         window.addEventListener('DOMContentLoaded', () => {
-            const timestamp = Date.now();
-            const imageUrl = `aatma-background.png?v=${timestamp}`;
-            
-            const testImg = new Image();
-            testImg.onload = () => {
-                console.log('Background image loaded successfully');
-                document.body.style.backgroundImage = `url("${imageUrl}")`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center top';
-                document.body.style.backgroundRepeat = 'no-repeat';
-            };
-            testImg.onerror = () => {
-                console.log('Background image failed to load - using gradient fallback');
-                document.body.style.backgroundImage = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
-            };
-            testImg.src = imageUrl;
+            const bgImg = document.querySelector('.background-image');
+            if (bgImg) {
+                bgImg.onerror = () => {
+                    console.log('Background image failed to load - using fallback');
+                    bgImg.style.display = 'none';
+                    document.body.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                };
+                bgImg.onload = () => {
+                    console.log('Background image loaded successfully');
+                };
+            }
         });
     </script>
 </body>
