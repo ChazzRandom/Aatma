@@ -39,8 +39,12 @@
         }
 
         body {
-            background: url('aatma-background.png') center center / cover no-repeat;
-            background-color: var(--bg-primary);
+            background-color: #1a1a2e;
+            background-image: url('./aatma-background.png'), linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-size: cover, cover;
+            background-position: center center, center center;
+            background-repeat: no-repeat, no-repeat;
+            background-attachment: fixed, fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             user-select: none;
@@ -843,23 +847,56 @@
             aatmaDevice.requestSensorPermission();
         }
 
+        // Global functions for button events
+        let aatmaDevice;
+        
         function toggleScanning() {
-            aatmaDevice.toggleScanning();
+            if (aatmaDevice) {
+                aatmaDevice.toggleScanning();
+            } else {
+                console.log('Device not initialized');
+            }
         }
         
         function adjustSensitivity(delta) {
-            aatmaDevice.adjustSensitivity(delta);
+            if (aatmaDevice) {
+                aatmaDevice.adjustSensitivity(delta);
+            } else {
+                console.log('Device not initialized');
+            }
         }
         
         function switchTab(index) {
-            // Tab switching placeholder for mobile
-            console.log('Tab switched to:', index);
+            try {
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                // Add active class to selected tab
+                const navItems = document.querySelectorAll('.nav-item');
+                if (navItems[index]) {
+                    navItems[index].classList.add('active');
+                }
+                console.log('Tab switched to:', index);
+            } catch (error) {
+                console.log('Tab switch error:', error);
+            }
         }
 
-        // Initialize the app
-        let aatmaDevice;
+        // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            aatmaDevice = new AatmaMobile();
+            try {
+                aatmaDevice = new AatmaMobile();
+                console.log('Mobile app initialized successfully');
+            } catch (error) {
+                console.log('Initialization error:', error);
+            }
+        });
+        
+        // Background image error handling
+        window.addEventListener('load', () => {
+            const testImg = new Image();
+            testImg.onload = () => console.log('Background image loaded');
+            testImg.onerror = () => console.log('Background image failed to load');
+            testImg.src = './aatma-background.png';
         });
     </script>
 </body>
