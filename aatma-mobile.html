@@ -554,7 +554,10 @@
                     <div class="word-display" id="wordDisplay">
                         <div class="current-word" id="currentWord"></div>
                         <div class="word-category" id="wordCategory"></div>
-                        <button class="test-speech-btn" onclick="testSpeech()" style="margin-top: 10px; padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 0.9rem;">Test Speech</button>
+                        <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                            <button class="test-speech-btn" onclick="testSpeech()" style="padding: 8px 12px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 0.8rem;">Test Speech</button>
+                            <button class="test-word-btn" onclick="forceWordGeneration()" style="padding: 8px 12px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 0.8rem;">Force Word</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -800,7 +803,12 @@
             }
             
             calculateSensorIntensity() {
-                // Calculate combined sensor intensity from accelerometer and magnetometer
+                // Ensure baseline is established
+                if (!this.baseline.accelerometer.x) {
+                    this.establishBaseline();
+                    return 0;
+                }
+                
                 const accel = this.sensorReadings.accelerometer;
                 const mag = this.sensorReadings.magnetometer;
                 
@@ -818,8 +826,25 @@
                     Math.pow(mag.z - this.baseline.magnetometer.z, 2)
                 );
                 
-                // Combine readings with weights (magnetometer more important for EMF)
-                return (accelMagnitude * 0.3 + magMagnitude * 0.7) * this.sensitivity;
+                // Combine readings with weights and apply sensitivity
+                const intensity = (accelMagnitude * 0.3 + magMagnitude * 0.7);
+                console.log(`Sensor intensity: ${intensity.toFixed(3)}, Sensitivity: ${this.sensitivity}`);
+                
+                return intensity;
+            }
+            
+            establishBaseline() {
+                this.baseline.accelerometer = {
+                    x: this.sensorReadings.accelerometer.x,
+                    y: this.sensorReadings.accelerometer.y,
+                    z: this.sensorReadings.accelerometer.z
+                };
+                this.baseline.magnetometer = {
+                    x: this.sensorReadings.magnetometer.x,
+                    y: this.sensorReadings.magnetometer.y,
+                    z: this.sensorReadings.magnetometer.z
+                };
+                console.log('Baseline established:', this.baseline);
             }
             
             selectCategoryBySensorData(intensity) {
@@ -988,15 +1013,22 @@
             }
             
             calculateEMFFromSensors() {
-                // Calculate EMF reading based on actual sensor intensity
-                const intensity = this.calculateSensorIntensity();
+                // Enhanced sensor simulation with better responsiveness
+                const time = Date.now() / 1000;
                 
-                // Convert sensor intensity to EMF scale (0-100)
-                let emfValue = intensity * 100;
+                // Base EMF reading with some variation
+                let baseEMF = 5 + Math.sin(time * 0.1) * 2;
                 
-                // Apply sensitivity multiplier
-                const sensitivityMultiplier = this.sensitivity / 50;
-                emfValue *= sensitivityMultiplier;
+                // Add random spikes for testing
+                if (Math.random() > 0.95) {
+                    baseEMF += Math.random() * 30;
+                }
+                
+                // Apply sensitivity multiplier (1-100 scale)
+                const sensitivityMultiplier = this.sensitivity / 20; // More responsive
+                let emfValue = baseEMF * sensitivityMultiplier;
+                
+                console.log(`EMF: ${emfValue.toFixed(1)}%, Sensitivity: ${this.sensitivity}`);
                 
                 return Math.min(100, Math.max(0, emfValue));
             }
@@ -1149,6 +1181,21 @@
                 console.error('Speech synthesis not supported');
                 wordElement.textContent = 'Not Supported';
                 categoryElement.textContent = 'Speech synthesis unavailable';
+            }
+        }
+
+        function forceWordGeneration() {
+            console.log('Forcing word generation for testing');
+            if (aatmaDevice && aatmaDevice.isScanning) {
+                aatmaDevice.generateWord();
+                aatmaDevice.lastWordTime = Date.now();
+            } else {
+                // Generate word even if not scanning for testing
+                if (aatmaDevice) {
+                    aatmaDevice.generateWord();
+                } else {
+                    console.error('Aatma device not initialized');
+                }
             }
         }
 
