@@ -27,7 +27,8 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+            background: url('aatma-background.png') center center / cover no-repeat;
+            background-attachment: fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             min-height: 100vh;
@@ -731,10 +732,10 @@
             }
 
             .main-button {
-                width: 80px;
-                height: 80px;
+                width: 120px;
+                height: 50px;
                 border: none;
-                border-radius: 50%;
+                border-radius: 25px;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 position: relative;
@@ -743,38 +744,10 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0;
-            }
-            
-            .power-icon {
-                width: 30px;
-                height: 30px;
-                position: relative;
-            }
-            
-            .power-icon::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 3px;
-                height: 18px;
-                background: white;
-                border-radius: 2px;
-            }
-            
-            .power-icon::after {
-                content: '';
-                position: absolute;
-                top: 8px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 24px;
-                height: 24px;
-                border: 3px solid white;
-                border-bottom: none;
-                border-radius: 50% 50% 0 0;
+                font-size: 1rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .navigation {
@@ -1044,7 +1017,7 @@
         
         <div class="control-section">
             <button class="main-button start-scanning" id="mainButton" onclick="toggleScanning()">
-                <div class="power-icon"></div>
+                SCAN
             </button>
         </div>
     </div>
@@ -1083,7 +1056,7 @@
                 this.sensitivity = 50;
                 this.isCalibrating = false;
                 this.calibrationData = [];
-                this.emfBaseline = 0;
+                this.emfBaseline = 15; // Default baseline to allow immediate scanning
                 this.batteryOptimized = false;
                 this.performanceMode = 'standard';
                 this.sessionStats = {
@@ -1330,11 +1303,6 @@
             }
             
             startScanning() {
-                if (!this.isCalibrating) {
-                    this.startCalibration();
-                    return;
-                }
-                
                 this.isScanning = true;
                 this.sessionTime = 0;
                 this.sessionStats = {
@@ -1346,9 +1314,7 @@
                 
                 const button = document.getElementById('mainButton');
                 button.className = 'main-button stop-scanning';
-                const powerIcon = button.querySelector('.power-icon');
-                powerIcon.style.backgroundColor = '#ef4444';
-                powerIcon.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.6)';
+                button.textContent = 'STOP';
                 document.getElementById('sessionStatus').textContent = 'Scanning for Paranormal Activity...';
                 document.getElementById('scanningIndicator').classList.add('active');
                 
@@ -1376,10 +1342,9 @@
                 
                 this.showStatusMessage('Calibrating sensors... Hold device still', 'info');
                 const button = document.getElementById('mainButton');
-                const powerIcon = button.querySelector('.power-icon');
                 button.disabled = true;
                 button.style.opacity = '0.6';
-                powerIcon.style.opacity = '0.5';
+                button.textContent = 'CALIBRATING...';
                 
                 this.calibrationTimer = setInterval(() => {
                     calibrationTime++;
@@ -1404,15 +1369,19 @@
                 
                 this.isCalibrating = false;
                 const button = document.getElementById('mainButton');
-                const powerIcon = button.querySelector('.power-icon');
                 button.disabled = false;
                 button.style.opacity = '1';
-                powerIcon.style.opacity = '1';
+                button.textContent = 'SCAN';
                 
                 this.triggerHapticFeedback('success');
-                this.showStatusMessage(`Calibration complete. Baseline: ${this.emfBaseline.toFixed(1)}`, 'success');
+                this.showStatusMessage(`Calibration complete. Starting scan...`, 'success');
                 
                 console.log(`Sensor calibration completed. Baseline: ${this.emfBaseline.toFixed(1)}`);
+                
+                // Automatically start scanning after calibration
+                setTimeout(() => {
+                    this.startScanning();
+                }, 1500);
             }
             
             stopScanning() {
@@ -1420,9 +1389,7 @@
                 
                 const button = document.getElementById('mainButton');
                 button.className = 'main-button start-scanning';
-                const powerIcon = button.querySelector('.power-icon');
-                powerIcon.style.backgroundColor = '';
-                powerIcon.style.boxShadow = '';
+                button.textContent = 'SCAN';
                 document.getElementById('sessionStatus').textContent = 'Session Completed';
                 document.getElementById('scanningIndicator').classList.remove('active');
                 
