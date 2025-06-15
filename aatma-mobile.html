@@ -121,7 +121,7 @@
 
         .emf-lights {
             display: flex;
-            flex-direction: column-reverse;
+            flex-direction: column;
             gap: 3px;
             height: 100%;
             justify-content: flex-start;
@@ -416,6 +416,45 @@
             }
         }
 
+        /* Navigation bar */
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
         /* Prevent zoom on input focus */
         input, select, textarea, button {
             font-size: 16px;
@@ -436,16 +475,16 @@
                 
                 <div class="right-emf">
                     <div class="emf-lights" id="emfLights">
-                        <div class="emf-light red"></div>
-                        <div class="emf-light red"></div>
-                        <div class="emf-light red"></div>
-                        <div class="emf-light orange"></div>
-                        <div class="emf-light orange"></div>
+                        <div class="emf-light green"></div>
+                        <div class="emf-light green"></div>
+                        <div class="emf-light green"></div>
                         <div class="emf-light yellow"></div>
                         <div class="emf-light yellow"></div>
-                        <div class="emf-light green"></div>
-                        <div class="emf-light green"></div>
-                        <div class="emf-light green"></div>
+                        <div class="emf-light orange"></div>
+                        <div class="emf-light orange"></div>
+                        <div class="emf-light red"></div>
+                        <div class="emf-light red"></div>
+                        <div class="emf-light red"></div>
                     </div>
                 </div>
             </div>
@@ -471,6 +510,25 @@
 
 
             <button class="scan-button" id="scanButton" onclick="toggleScanning()">SCAN</button>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-item active" onclick="switchTab(0)">
+                <span class="nav-icon">📡</span>
+                <span>Scan</span>
+            </button>
+            <button class="nav-item" onclick="switchTab(1)">
+                <span class="nav-icon">📜</span>
+                <span>History</span>
+            </button>
+            <button class="nav-item" onclick="switchTab(2)">
+                <span class="nav-icon">💬</span>
+                <span>Words</span>
+            </button>
+            <button class="nav-item" onclick="switchTab(3)">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
         </div>
     </div>
 
@@ -788,13 +846,21 @@
         function toggleScanning() {
             aatmaDevice.toggleScanning();
         }
-
+        
         function adjustSensitivity(delta) {
             aatmaDevice.adjustSensitivity(delta);
         }
+        
+        function switchTab(index) {
+            // Tab switching placeholder for mobile
+            console.log('Tab switched to:', index);
+        }
 
         // Initialize the app
-        const aatmaDevice = new AatmaMobile();
+        let aatmaDevice;
+        document.addEventListener('DOMContentLoaded', () => {
+            aatmaDevice = new AatmaMobile();
+        });
     </script>
 </body>
 </html>
