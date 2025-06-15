@@ -1078,6 +1078,14 @@
                 this.sensitivity = Math.max(10, Math.min(100, this.sensitivity + delta));
                 document.getElementById('sensitivityValue').textContent = this.sensitivity + '%';
                 document.getElementById('sensitivityFill').style.width = this.sensitivity + '%';
+                
+                // Update hardcoded sensitivity display in settings
+                const settingsText = document.querySelector('#tab3 div:last-child p:nth-child(2)');
+                if (settingsText) {
+                    settingsText.textContent = `Sensitivity: ${this.sensitivity}%`;
+                }
+                
+                console.log(`Sensitivity adjusted to: ${this.sensitivity}%`);
             }
         }
 
@@ -1090,16 +1098,16 @@
         let aatmaDevice;
         
         function toggleScanning() {
-            if (aatmaDevice) {
-                aatmaDevice.toggleScanning();
+            if (window.aatmaDevice) {
+                window.aatmaDevice.toggleScanning();
             } else {
                 console.log('Device not initialized');
             }
         }
         
         function adjustSensitivity(delta) {
-            if (aatmaDevice) {
-                aatmaDevice.adjustSensitivity(delta);
+            if (window.aatmaDevice) {
+                window.aatmaDevice.adjustSensitivity(delta);
             } else {
                 console.log('Device not initialized');
             }
@@ -1186,23 +1194,25 @@
 
         function forceWordGeneration() {
             console.log('Forcing word generation for testing');
-            if (aatmaDevice && aatmaDevice.isScanning) {
-                aatmaDevice.generateWord();
-                aatmaDevice.lastWordTime = Date.now();
-            } else {
-                // Generate word even if not scanning for testing
-                if (aatmaDevice) {
-                    aatmaDevice.generateWord();
-                } else {
-                    console.error('Aatma device not initialized');
+            if (window.aatmaDevice) {
+                try {
+                    window.aatmaDevice.generateWord();
+                    if (window.aatmaDevice.lastWordTime !== undefined) {
+                        window.aatmaDevice.lastWordTime = Date.now();
+                    }
+                    console.log('Word generation forced successfully');
+                } catch (error) {
+                    console.error('Error forcing word generation:', error);
                 }
+            } else {
+                console.error('Aatma device not initialized');
             }
         }
 
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             try {
-                aatmaDevice = new AatmaMobile();
+                window.aatmaDevice = new AatmaMobile();
                 console.log('Mobile app initialized successfully');
             } catch (error) {
                 console.log('Initialization error:', error);
