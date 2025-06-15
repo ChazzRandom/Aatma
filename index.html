@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Aatma - Paranormal Communication Device</title>
     <style>
         :root {
@@ -26,29 +26,33 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport for modern browsers */
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
         body {
             background: url('aatma-background.png') center center / cover no-repeat;
-            background-attachment: fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
         }
 
         .container {
-            padding: 80px 15px 75px 15px;
+            padding: 10px 15px 65px 15px;
             max-width: 100%;
-            height: 100vh;
+            height: 100%;
             position: relative;
             z-index: 1;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+
 
         .title {
             font-size: clamp(2.5rem, 10vw, 4rem);
@@ -248,15 +252,24 @@
             position: absolute;
             top: -2px;
             left: 0%;
-            transition: left 0.5s ease;
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
             animation: pulse 2s infinite;
+        }
+
+        .progress-dot.scanning {
+            animation: scanMove 6s linear infinite, pulse 2s infinite;
         }
         
         .progress-dot.paused {
             animation-play-state: paused;
             background: #ef4444;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+
+        @keyframes scanMove {
+            0% { left: 0%; }
+            50% { left: calc(100% - 12px); }
+            100% { left: 0%; }
         }
 
         .timer {
@@ -965,10 +978,7 @@
     <div class="scanning-indicator" id="scanningIndicator"></div>
     
     <div class="container">
-        <div class="header">
-            <p class="subtitle">Ready for Spirit Communication</p>
-            <p class="version-info">Complete 50,000+ Word System</p>
-        </div>
+
         
         <div id="permissionPrompt" class="permission-alert hidden">
             <h3>🔮 Enable Paranormal Detection</h3>
@@ -1010,31 +1020,17 @@
             </div>
         </div>
         
-        <div class="sensor-grid">
-            <div class="emf-light-bar" id="emfLightBar">
-                <div class="emf-light green"></div>
-                <div class="emf-light green"></div>
-                <div class="emf-light green"></div>
-                <div class="emf-light yellow"></div>
-                <div class="emf-light yellow"></div>
-                <div class="emf-light orange"></div>
-                <div class="emf-light orange"></div>
-                <div class="emf-light red"></div>
-                <div class="emf-light red"></div>
-                <div class="emf-light red"></div>
-            </div>
-            
-            <div class="sensor-card" style="min-width: 120px; padding: 10px;">
-                <div class="pressure-value" id="pressureValue" style="font-size: 1.2rem;">1013</div>
-                <div class="pressure-unit" style="font-size: 0.7rem;">hPa</div>
-                <div class="pressure-status" id="pressureStatus" style="font-size: 0.7rem;">Normal</div>
-            </div>
-        </div>
-        
         <div class="session-display">
             <div class="progress-bar">
                 <div class="progress-dot" id="progressDot"></div>
             </div>
+            
+            <div class="sensor-card" style="min-width: 120px; padding: 10px; margin: 10px auto;">
+                <div class="pressure-value" id="pressureValue" style="font-size: 1.2rem;">1013</div>
+                <div class="pressure-unit" style="font-size: 0.7rem;">hPa</div>
+                <div class="pressure-status" id="pressureStatus" style="font-size: 0.7rem;">Normal</div>
+            </div>
+            
             <div class="status" id="sessionStatus" style="font-size: 0.9rem; text-align: center;">Ready to Begin Session</div>
             <div class="session-stats" style="display: flex; justify-content: space-around; font-size: 0.8rem; margin-top: 8px;">
                 <div class="stat-item">
@@ -1074,6 +1070,19 @@
             </div>
         </div>
         
+        <div class="emf-light-bar" id="emfLightBar">
+            <div class="emf-light green"></div>
+            <div class="emf-light green"></div>
+            <div class="emf-light green"></div>
+            <div class="emf-light yellow"></div>
+            <div class="emf-light yellow"></div>
+            <div class="emf-light orange"></div>
+            <div class="emf-light orange"></div>
+            <div class="emf-light red"></div>
+            <div class="emf-light red"></div>
+            <div class="emf-light red"></div>
+        </div>
+
         <div class="control-section">
             <button class="main-button start-scanning" id="mainButton" onclick="toggleScanning()">
                 SCAN
@@ -1353,6 +1362,12 @@
                     startTime: new Date()
                 };
                 
+                // Start dot scanning animation
+                const dot = document.getElementById('progressDot');
+                if (dot) {
+                    dot.classList.add('scanning');
+                }
+                
                 const button = document.getElementById('mainButton');
                 button.className = 'main-button stop-scanning';
                 button.textContent = 'STOP';
@@ -1428,6 +1443,12 @@
             stopScanning() {
                 this.isScanning = false;
                 
+                // Stop dot scanning animation
+                const dot = document.getElementById('progressDot');
+                if (dot) {
+                    dot.classList.remove('scanning');
+                }
+                
                 const button = document.getElementById('mainButton');
                 button.className = 'main-button start-scanning';
                 button.textContent = 'SCAN';
@@ -1444,11 +1465,8 @@
             }
             
             updateTimerDisplay() {
-                const dot = document.getElementById('progressDot');
-                if (dot && this.isScanning) {
-                    const progress = (this.sessionTime % 12) / 12 * 100;
-                    dot.style.left = `${progress}%`;
-                }
+                // Timer display now handled by CSS animation
+                // Dot moves continuously via CSS @keyframes scanMove
             }
             
             generateWord() {
