@@ -725,6 +725,15 @@
                 this.sensorTriggerThreshold = 0.3; // Minimum intensity to trigger word
                 this.wordCooldown = 5000; // 5 seconds between words minimum
                 
+                // Fallback word generation for testing (when no paranormal activity detected)
+                this.fallbackTimer = setInterval(() => {
+                    if (Date.now() - this.lastWordTime > 20000) { // If no words for 20 seconds
+                        console.log('Fallback word generation - no paranormal activity detected');
+                        this.generateWord();
+                        this.lastWordTime = Date.now();
+                    }
+                }, 25000); // Check every 25 seconds
+                
                 this.sensorUpdateTimer = setInterval(() => {
                     this.updateSensorReadings();
                 }, 500);
@@ -753,7 +762,7 @@
                 button.classList.remove('scanning');
                 
                 clearInterval(this.sessionTimer);
-                clearInterval(this.wordGenerationTimer);
+                clearInterval(this.fallbackTimer);
                 clearInterval(this.sensorUpdateTimer);
                 
                 this.hideCurrentWord();
@@ -995,8 +1004,8 @@
             checkSensorTrigger(emfReading) {
                 const currentTime = Date.now();
                 
-                // Trigger word generation based on EMF spikes
-                if (emfReading > 30 && // Significant EMF reading
+                // Trigger word generation based on EMF spikes (lowered threshold for testing)
+                if (emfReading > 15 && // More sensitive EMF reading
                     currentTime - this.lastWordTime > this.wordCooldown) {
                     
                     console.log(`EMF spike detected: ${emfReading.toFixed(1)}% - Generating word`);
