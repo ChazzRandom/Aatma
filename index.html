@@ -1451,8 +1451,13 @@
             }
             
             updateTimerDisplay() {
-                // Timer display now handled by CSS animation
-                // Dot moves continuously via CSS @keyframes scanMove
+                // Ensure dot animation continues during scanning
+                const dot = document.getElementById('progressDot');
+                if (dot && this.isScanning) {
+                    if (!dot.classList.contains('scanning')) {
+                        dot.classList.add('scanning');
+                    }
+                }
             }
             
             generateWord() {
@@ -1590,18 +1595,33 @@
                     // Stop any ongoing speech
                     window.speechSynthesis.cancel();
                     
-                    // Wait a moment for voices to load
-                    const speak = () => {
+                    // iOS/Safari requires user interaction to enable speech
+                    // Force initialize speech synthesis first
+                    const testUtterance = new SpeechSynthesisUtterance('');
+                    window.speechSynthesis.speak(testUtterance);
+                    window.speechSynthesis.cancel();
+                    
+                    // Small delay for iOS voice initialization
+                    setTimeout(() => {
                         const utterance = new SpeechSynthesisUtterance(word);
-                        utterance.rate = 0.6;
-                        utterance.pitch = 0.7;
+                        
+                        // iOS-optimized settings
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1.0;
                         utterance.volume = 1.0;
                         utterance.lang = 'en-US';
                         
-                        // Select a voice if available
+                        // Get iOS system voices
                         const voices = window.speechSynthesis.getVoices();
                         if (voices.length > 0) {
-                            utterance.voice = voices.find(voice => voice.lang.includes('en')) || voices[0];
+                            // Prefer iOS system voices
+                            const iosVoice = voices.find(voice => 
+                                voice.name.includes('Samantha') || 
+                                voice.name.includes('Alex') ||
+                                voice.name.includes('Daniel') ||
+                                voice.lang === 'en-US'
+                            ) || voices[0];
+                            utterance.voice = iosVoice;
                         }
                         
                         utterance.onstart = () => {
@@ -1626,39 +1646,31 @@
                         
                         try {
                             window.speechSynthesis.speak(utterance);
+                            console.log('iOS speech initiated for:', word);
                         } catch (error) {
                             console.log('Speech failed:', error);
                             if (dot) {
                                 dot.classList.remove('paused');
                             }
                         }
-                    };
-                    
-                    // Ensure voices are loaded
-                    if (window.speechSynthesis.getVoices().length === 0) {
-                        window.speechSynthesis.addEventListener('voiceschanged', speak, { once: true });
-                    } else {
-                        speak();
-                    }
+                    }, 100);
                 } else {
                     console.log('Speech synthesis not supported');
                 }
             }
             
             updateEnvironmentalData(event) {
-                // Handle environmental pressure changes only
-                const variation = (Math.random() - 0.5) * 8;
-                const currentPressure = this.baselinePressure + variation;
+                // Realistic atmospheric pressure readings (not motion-based)
+                // Normal atmospheric pressure: 1013.25 hPa (sea level standard)
+                // Real pressure changes are very gradual (0.1-2 hPa per hour typically)
+                const microVariation = (Math.random() - 0.5) * 0.3; // Very small realistic changes
+                const currentPressure = this.baselinePressure + microVariation;
                 document.getElementById('pressureValue').textContent = Math.round(currentPressure);
                 
                 const pressureStatus = document.getElementById('pressureStatus');
-                if (Math.abs(variation) > 5) {
-                    pressureStatus.textContent = 'Anomaly';
-                    pressureStatus.style.background = 'rgba(239, 68, 68, 0.3)';
-                    pressureStatus.style.color = '#ef4444';
-                    this.triggerHapticFeedback('light');
-                } else if (Math.abs(variation) > 2) {
-                    pressureStatus.textContent = 'Fluctuating';
+                // Real pressure "anomalies" are rare and gradual
+                if (Math.abs(microVariation) > 0.2) {
+                    pressureStatus.textContent = 'Changing';
                     pressureStatus.style.background = 'rgba(245, 158, 11, 0.3)';
                     pressureStatus.style.color = '#f59e0b';
                 } else {
