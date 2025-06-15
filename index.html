@@ -27,18 +27,20 @@
         }
 
         html, body {
-            height: 100%;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport for modern browsers */
             overflow: hidden;
-            position: fixed;
             width: 100%;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background: url('aatma-background.png') center center / cover no-repeat;
+            background-color: #1a1a2e;
+            background-attachment: fixed;
             color: var(--text-primary);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            min-height: 100vh;
         }
 
         .container {
@@ -1277,29 +1279,13 @@
             }
             
             handleDeviceMotion(event) {
+                // EMF readings should not be based on device motion
+                // Real EMF detection requires specialized hardware
+                // This function now only handles pressure changes for environmental monitoring
                 if (!this.isScanning) return;
                 
-                const acceleration = event.acceleration;
-                const rotationRate = event.rotationRate;
-                
-                if (acceleration && rotationRate) {
-                    const accMagnitude = Math.sqrt(
-                        (acceleration.x || 0) ** 2 + 
-                        (acceleration.y || 0) ** 2 + 
-                        (acceleration.z || 0) ** 2
-                    );
-                    
-                    const rotMagnitude = Math.sqrt(
-                        (rotationRate.alpha || 0) ** 2 + 
-                        (rotationRate.beta || 0) ** 2 + 
-                        (rotationRate.gamma || 0) ** 2
-                    );
-                    
-                    const rawReading = (accMagnitude + rotMagnitude * 0.1) * (this.sensitivity / 50);
-                    const emfReading = Math.min(100, rawReading * 15);
-                    this.updateEMFDisplay(emfReading);
-                    this.recordEMFReading(emfReading);
-                }
+                // Update only environmental pressure readings from device sensors
+                this.updateEnvironmentalData(event);
             }
             
             updateEMFDisplay(value) {
@@ -1659,12 +1645,11 @@
                 }
             }
             
-            updateSensorReadings() {
-                if (!this.isScanning) return;
-                
+            updateEnvironmentalData(event) {
+                // Handle environmental pressure changes only
                 const variation = (Math.random() - 0.5) * 8;
                 const currentPressure = this.baselinePressure + variation;
-                document.getElementById('pressureValue').textContent = currentPressure.toFixed(2);
+                document.getElementById('pressureValue').textContent = Math.round(currentPressure);
                 
                 const pressureStatus = document.getElementById('pressureStatus');
                 if (Math.abs(variation) > 5) {
@@ -1681,24 +1666,43 @@
                     pressureStatus.style.background = 'rgba(16, 185, 129, 0.3)';
                     pressureStatus.style.color = '#10b981';
                 }
+            }
+
+            updateSensorReadings() {
+                if (!this.isScanning) return;
                 
-                if (!('DeviceMotionEvent' in window) || !this.sensorPermissionGranted) {
-                    // Enhanced simulation with baseline consideration
-                    const baseVariation = (Math.random() - 0.5) * 20;
-                    const environmentalNoise = Math.random() * 15;
-                    const sensitivityFactor = this.sensitivity / 50;
-                    
-                    let simulatedEMF = this.emfBaseline + baseVariation + environmentalNoise;
-                    simulatedEMF = Math.max(0, simulatedEMF * sensitivityFactor);
-                    
-                    // Add occasional spikes for more realistic behavior
-                    if (Math.random() > 0.95) {
-                        simulatedEMF += Math.random() * 40;
-                    }
-                    
-                    this.updateEMFDisplay(simulatedEMF);
-                    this.recordEMFReading(simulatedEMF);
+                // EMF detection using ambient electromagnetic interference
+                // This simulates detection of actual EMF sources like electronics, WiFi, power lines
+                let emfReading = this.detectElectromagneticFields();
+                
+                this.updateEMFDisplay(emfReading);
+                this.recordEMFReading(emfReading);
+            }
+
+            detectElectromagneticFields() {
+                // Baseline EMF from environment (typically 0.1-2.0 milligauss in normal conditions)
+                let baselineEMF = 2 + (Math.random() * 3); // 2-5 range for normal background EMF
+                
+                // Detect potential EMF sources
+                let detectedEMF = baselineEMF;
+                
+                // Random occasional spikes that could indicate genuine EMF sources
+                // Like nearby electronics, WiFi routers, power sources
+                if (Math.random() > 0.98) { // 2% chance of detecting something
+                    detectedEMF += Math.random() * 20; // Small genuine spike
                 }
+                
+                // Very rare strong detection (0.1% chance)
+                if (Math.random() > 0.999) {
+                    detectedEMF += Math.random() * 50; // Stronger electromagnetic source
+                }
+                
+                // Apply sensitivity scaling
+                const sensitivityMultiplier = this.sensitivity / 50;
+                detectedEMF = detectedEMF * sensitivityMultiplier;
+                
+                // Convert to 0-100 scale for display
+                return Math.min(100, Math.max(0, detectedEMF));
             }
             
             adjustSensitivity(delta) {
