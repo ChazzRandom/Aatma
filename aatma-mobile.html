@@ -47,32 +47,7 @@
             position: relative;
         }
 
-        .font-selector, .color-selector {
-            margin: 10px 0;
-            padding: 10px;
-            background: rgba(139, 92, 246, 0.1);
-            border-radius: 8px;
-        }
 
-        .font-option, .color-option {
-            margin: 5px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 5px;
-            color: var(--text-primary);
-            cursor: pointer;
-            width: 100%;
-            text-align: left;
-        }
-
-        .font-option:hover, .color-option:hover {
-            background: rgba(139, 92, 246, 0.3);
-        }
-
-        .font-option.active, .color-option.active {
-            background: rgba(139, 92, 246, 0.5);
-        }
 
         .background-image {
             position: fixed;
@@ -91,7 +66,7 @@
             display: flex;
             flex-direction: column;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            padding-top: max(env(safe-area-inset-top), 200px);
+            padding-top: max(env(safe-area-inset-top), 280px);
             padding-bottom: max(env(safe-area-inset-bottom), 70px);
             padding-left: max(env(safe-area-inset-left), 10px);
             padding-right: max(env(safe-area-inset-right), 10px);
@@ -126,6 +101,14 @@
             height: 250px;
             margin: 15px 0;
             position: relative;
+            gap: 15px;
+        }
+
+        .center-word-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .left-scanner {
@@ -524,6 +507,13 @@
                         </div>
                     </div>
                     
+                    <div class="center-word-display">
+                        <div class="word-display" id="wordDisplay">
+                            <div class="current-word" id="currentWord"></div>
+                            <div class="word-category" id="wordCategory"></div>
+                        </div>
+                    </div>
+                    
                     <div class="right-emf">
                         <div class="emf-lights" id="emfLights">
                             <div class="emf-light green"></div>
@@ -537,22 +527,6 @@
                             <div class="emf-light red"></div>
                             <div class="emf-light red"></div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="word-display" id="wordDisplay">
-                    <div class="current-word" id="currentWord"></div>
-                    <div class="word-category" id="wordCategory"></div>
-                </div>
-
-                <div class="sensitivity-section">
-                    <div class="sensitivity-controls">
-                        <button class="sensitivity-btn" onclick="adjustSensitivity(-10)">-</button>
-                        <div class="sensitivity-bar">
-                            <div class="sensitivity-fill" id="sensitivityFill" style="width: 50%"></div>
-                        </div>
-                        <button class="sensitivity-btn" onclick="adjustSensitivity(10)">+</button>
-                        <div class="sensitivity-value" id="sensitivityValue">50%</div>
                     </div>
                 </div>
 
@@ -581,25 +555,16 @@
                 <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Settings</h2>
                 <div style="padding: 10px;">
                     
-                    <div class="font-selector">
-                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Font Style</h3>
-                        <button class="font-option active" onclick="changeFont('system')" data-font="system">System Default</button>
-                        <button class="font-option" onclick="changeFont('serif')" data-font="serif" style="font-family: Georgia, serif;">Georgia Serif</button>
-                        <button class="font-option" onclick="changeFont('mono')" data-font="mono" style="font-family: 'Courier New', monospace;">Courier Mono</button>
-                        <button class="font-option" onclick="changeFont('sans')" data-font="sans" style="font-family: Helvetica, Arial, sans-serif;">Helvetica Sans</button>
-                        <button class="font-option" onclick="changeFont('gothic')" data-font="gothic" style="font-family: 'Times New Roman', serif;">Times Gothic</button>
-                        <button class="font-option" onclick="changeFont('modern')" data-font="modern" style="font-family: 'Trebuchet MS', sans-serif;">Trebuchet Modern</button>
-                    </div>
-
-                    <div class="color-selector">
-                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Text Color</h3>
-                        <button class="color-option active" onclick="changeColor('white')" data-color="white" style="color: #ffffff;">White (Default)</button>
-                        <button class="color-option" onclick="changeColor('purple')" data-color="purple" style="color: #8b5cf6;">Purple</button>
-                        <button class="color-option" onclick="changeColor('cyan')" data-color="cyan" style="color: #06b6d4;">Cyan</button>
-                        <button class="color-option" onclick="changeColor('green')" data-color="green" style="color: #10b981;">Green</button>
-                        <button class="color-option" onclick="changeColor('gold')" data-color="gold" style="color: #f59e0b;">Gold</button>
-                        <button class="color-option" onclick="changeColor('red')" data-color="red" style="color: #ef4444;">Red</button>
-                        <button class="color-option" onclick="changeColor('silver')" data-color="silver" style="color: #94a3b8;">Silver</button>
+                    <div class="sensitivity-section">
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Sensor Sensitivity</h3>
+                        <div class="sensitivity-controls">
+                            <button class="sensitivity-btn" onclick="adjustSensitivity(-10)">-</button>
+                            <div class="sensitivity-bar">
+                                <div class="sensitivity-fill" id="sensitivityFill" style="width: 50%"></div>
+                            </div>
+                            <button class="sensitivity-btn" onclick="adjustSensitivity(10)">+</button>
+                            <div class="sensitivity-value" id="sensitivityValue">50%</div>
+                        </div>
                     </div>
 
                     <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(139, 92, 246, 0.3);">
@@ -987,68 +952,11 @@
             }
         }
 
-        function changeFont(fontType) {
-            const fontMap = {
-                'system': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
-                'serif': 'Georgia, "Times New Roman", serif',
-                'mono': '"Courier New", Monaco, monospace',
-                'sans': 'Helvetica, Arial, sans-serif',
-                'gothic': '"Times New Roman", serif',
-                'modern': '"Trebuchet MS", "Lucida Grande", sans-serif'
-            };
 
-            document.documentElement.style.setProperty('--user-font', fontMap[fontType]);
-            
-            // Update active state
-            document.querySelectorAll('.font-option').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-font="${fontType}"]`).classList.add('active');
-            
-            // Save preference
-            localStorage.setItem('aatma-font', fontType);
-            console.log('Font changed to:', fontType);
-        }
-
-        function changeColor(colorType) {
-            const colorMap = {
-                'white': '#ffffff',
-                'purple': '#8b5cf6',
-                'cyan': '#06b6d4',
-                'green': '#10b981',
-                'gold': '#f59e0b',
-                'red': '#ef4444',
-                'silver': '#94a3b8'
-            };
-
-            document.documentElement.style.setProperty('--text-primary', colorMap[colorType]);
-            
-            // Update active state
-            document.querySelectorAll('.color-option').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[data-color="${colorType}"]`).classList.add('active');
-            
-            // Save preference
-            localStorage.setItem('aatma-color', colorType);
-            console.log('Color changed to:', colorType);
-        }
-
-        function loadUserPreferences() {
-            const savedFont = localStorage.getItem('aatma-font');
-            const savedColor = localStorage.getItem('aatma-color');
-            
-            if (savedFont) {
-                changeFont(savedFont);
-            }
-            
-            if (savedColor) {
-                changeColor(savedColor);
-            }
-        }
 
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             try {
-                // Load user preferences first
-                loadUserPreferences();
-                
                 aatmaDevice = new AatmaMobile();
                 console.log('Mobile app initialized successfully');
             } catch (error) {
