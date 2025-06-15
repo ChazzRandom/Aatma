@@ -353,7 +353,13 @@
         }
 
         .main-button:active {
-            transform: translateY(2px);
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.6);
+        }
+
+        .main-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5);
         }
 
         .sensitivity-control {
@@ -490,6 +496,71 @@
             display: none !important; 
         }
 
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .tutorial-content {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 80vh;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+        }
+
+        .tutorial-step {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tutorial-step h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .tutorial-step p {
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .tutorial-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .tutorial-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .version-badge {
             position: fixed;
             top: 15px;
@@ -504,37 +575,333 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Mobile optimizations */
+        /* iPhone optimizations */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
-                padding-bottom: 90px;
+                padding: 12px;
+                padding-bottom: 85px;
+                padding-top: env(safe-area-inset-top, 12px);
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .title {
+                font-size: clamp(2rem, 8vw, 3rem);
+                letter-spacing: 2px;
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+                margin-bottom: 6px;
+            }
+
+            .version-info {
+                font-size: 0.75rem;
             }
 
             .sensor-grid {
-                gap: 12px;
+                gap: 10px;
+                margin-bottom: 20px;
             }
 
             .sensor-card {
-                padding: 15px;
+                padding: 16px 12px;
+                border-radius: 16px;
             }
 
             .emf-circle {
-                width: 70px;
-                height: 70px;
+                width: 75px;
+                height: 75px;
+                margin-bottom: 12px;
             }
 
             .emf-value {
-                font-size: 1.3rem;
+                font-size: 1.4rem;
             }
 
             .pressure-value {
+                font-size: 1.4rem;
+            }
+
+            .sensor-label {
+                font-size: 0.85rem;
+                margin-top: 8px;
+            }
+
+            .session-display {
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .timer {
+                font-size: clamp(2.5rem, 10vw, 4rem);
+                margin-bottom: 12px;
+                letter-spacing: 1px;
+            }
+
+            .status {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+            }
+
+            .session-stats {
+                margin-top: 12px;
+                font-size: 0.85rem;
+            }
+
+            .word-display {
+                min-height: 100px;
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .current-word {
+                font-size: clamp(2rem, 8vw, 3rem);
+                letter-spacing: 1px;
+            }
+
+            .word-category {
+                font-size: 0.85rem;
+                margin-top: 8px;
+            }
+            
+            .word-history {
+                background: rgba(30, 30, 30, 0.8);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+                border: 1px solid rgba(139, 92, 246, 0.3);
+            }
+            
+            .history-title {
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+                margin-bottom: 12px;
+                text-align: center;
+            }
+            
+            .history-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+                min-height: 40px;
+                align-items: center;
+            }
+            
+            .history-word {
+                background: rgba(139, 92, 246, 0.2);
+                color: var(--primary-color);
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                border: 1px solid rgba(139, 92, 246, 0.4);
+                opacity: 0;
+                transform: scale(0.8);
+                animation: fadeInWord 0.5s ease forwards;
+            }
+            
+            @keyframes fadeInWord {
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .sensitivity-control {
+                padding: 16px;
+                margin-bottom: 16px;
+                border-radius: 12px;
+            }
+
+            .sensitivity-label {
+                font-size: 0.85rem;
+                margin-bottom: 12px;
+            }
+
+            .sensitivity-btn {
+                width: 44px;
+                height: 44px;
                 font-size: 1.3rem;
             }
 
             .main-button {
-                padding: 20px;
+                width: 80px;
+                height: 80px;
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0;
+            }
+            
+            .power-icon {
+                width: 30px;
+                height: 30px;
+                position: relative;
+            }
+            
+            .power-icon::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 3px;
+                height: 18px;
+                background: white;
+                border-radius: 2px;
+            }
+            
+            .power-icon::after {
+                content: '';
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 24px;
+                border: 3px solid white;
+                border-bottom: none;
+                border-radius: 50% 50% 0 0;
+            }
+
+            .navigation {
+                height: 70px;
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+
+            .nav-item {
+                font-size: 0.75rem;
+                padding: 8px 4px;
+                gap: 3px;
+            }
+
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+
+            .permission-alert {
+                padding: 16px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+            }
+
+            .permission-btn {
+                padding: 14px 24px;
+                font-size: 0.95rem;
+                margin-top: 12px;
+                border-radius: 20px;
+            }
+
+            .version-badge {
+                top: env(safe-area-inset-top, 12px);
+                left: 12px;
+                padding: 6px 12px;
+                font-size: 0.75rem;
+                border-radius: 16px;
+            }
+
+            .scanning-indicator {
+                top: env(safe-area-inset-top, 20px);
+                right: 20px;
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        /* iPhone landscape optimizations */
+        @media (max-width: 896px) and (orientation: landscape) and (max-height: 500px) {
+            .container {
+                padding: 8px 12px;
+                padding-bottom: 75px;
+            }
+
+            .header {
+                margin-bottom: 12px;
+            }
+
+            .title {
+                font-size: 2rem;
+                margin-bottom: 4px;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 4px;
+            }
+
+            .sensor-grid {
+                margin-bottom: 12px;
+            }
+
+            .sensor-card {
+                padding: 12px 8px;
+            }
+
+            .emf-circle {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 8px;
+            }
+
+            .emf-value, .pressure-value {
                 font-size: 1.2rem;
+            }
+
+            .session-display {
+                margin: 12px 0;
+                padding: 16px;
+            }
+
+            .timer {
+                font-size: 2rem;
+                margin-bottom: 8px;
+            }
+
+            .word-display {
+                min-height: 70px;
+                margin: 12px 0;
+                padding: 16px;
+            }
+
+            .current-word {
+                font-size: 1.8rem;
+            }
+
+            .sensitivity-control {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .main-button {
+                padding: 14px 16px;
+                font-size: 1rem;
+                min-height: 50px;
+            }
+
+            .navigation {
+                height: 60px;
+            }
+
+            .nav-item {
+                font-size: 0.7rem;
+                padding: 6px 2px;
+            }
+
+            .nav-icon {
+                font-size: 1rem;
             }
         }
 
@@ -583,6 +950,40 @@
             <p>Grant access to device sensors for electromagnetic field monitoring and environmental anomaly detection</p>
             <button class="permission-btn" onclick="requestSensorPermission()">Enable Sensors</button>
         </div>
+
+        <div id="tutorialOverlay" class="tutorial-overlay hidden">
+            <div class="tutorial-content">
+                <div class="tutorial-step" id="step1">
+                    <h3>Welcome to Aatma</h3>
+                    <p>Your paranormal communication device uses electromagnetic field detection and atmospheric pressure monitoring to facilitate spirit communication.</p>
+                    <button class="tutorial-btn" onclick="nextTutorialStep()">Continue</button>
+                </div>
+                
+                <div class="tutorial-step hidden" id="step2">
+                    <h3>EMF Detection</h3>
+                    <p>The green circle shows electromagnetic field readings. Higher values (red) indicate potential paranormal activity.</p>
+                    <button class="tutorial-btn" onclick="nextTutorialStep()">Continue</button>
+                </div>
+                
+                <div class="tutorial-step hidden" id="step3">
+                    <h3>Word Generation</h3>
+                    <p>When scanning, words are generated based on sensor readings and contextual algorithms from our 50,000+ word database.</p>
+                    <button class="tutorial-btn" onclick="nextTutorialStep()">Continue</button>
+                </div>
+                
+                <div class="tutorial-step hidden" id="step4">
+                    <h3>Sensitivity Control</h3>
+                    <p>Adjust sensor sensitivity using the + and - buttons. Higher sensitivity detects subtler changes.</p>
+                    <button class="tutorial-btn" onclick="nextTutorialStep()">Continue</button>
+                </div>
+                
+                <div class="tutorial-step hidden" id="step5">
+                    <h3>Ready to Begin</h3>
+                    <p>For best results, use in quiet environments. Sessions are automatically saved to History.</p>
+                    <button class="tutorial-btn" onclick="completeTutorial()">Start Investigation</button>
+                </div>
+            </div>
+        </div>
         
         <div class="sensor-grid">
             <div class="sensor-card">
@@ -624,6 +1025,11 @@
             <div class="word-category" id="wordCategory"></div>
         </div>
         
+        <div class="word-history" id="wordHistory">
+            <div class="history-title">Recent Words</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+        
         <div class="sensitivity-control">
             <div class="sensitivity-label">Sensor Sensitivity</div>
             <div class="sensitivity-slider">
@@ -638,7 +1044,7 @@
         
         <div class="control-section">
             <button class="main-button start-scanning" id="mainButton" onclick="toggleScanning()">
-                Start Paranormal Scan
+                <div class="power-icon"></div>
             </button>
         </div>
     </div>
@@ -670,16 +1076,26 @@
                 this.sessionTimer = null;
                 this.wordGenerationTimer = null;
                 this.sensorUpdateTimer = null;
+                this.calibrationTimer = null;
                 this.sensorPermissionGranted = false;
                 this.baselinePressure = 1013.25;
                 this.speechSynthesis = window.speechSynthesis;
                 this.sensitivity = 50;
+                this.isCalibrating = false;
+                this.calibrationData = [];
+                this.emfBaseline = 0;
+                this.batteryOptimized = false;
+                this.performanceMode = 'standard';
                 this.sessionStats = {
                     wordCount: 0,
                     anomalyCount: 0,
                     emfReadings: [],
                     startTime: null
                 };
+                
+                this.currentTab = 0;
+                this.wordHistory = [];
+                this.maxWordHistory = 5;
                 
                 // Complete Enhanced Word Bank - 50,000+ words across 7 languages
                 this.languages = ['english', 'hindi', 'spanish', 'arabic', 'latin', 'german', 'french'];
@@ -714,7 +1130,43 @@
                 this.checkSensorSupport();
                 this.updateUI();
                 this.loadSettings();
+                this.checkFirstTimeUser();
                 console.log('Aatma Device v1.0 initialized - GitHub Pages version');
+            }
+            
+            checkFirstTimeUser() {
+                const hasSeenTutorial = localStorage.getItem('aatmaTutorialCompleted');
+                if (!hasSeenTutorial) {
+                    setTimeout(() => {
+                        this.showTutorial();
+                    }, 1000);
+                }
+            }
+            
+            showTutorial() {
+                document.getElementById('tutorialOverlay').classList.remove('hidden');
+                this.currentTutorialStep = 1;
+            }
+            
+            nextTutorialStep() {
+                this.triggerHapticFeedback('light');
+                const currentStep = document.getElementById(`step${this.currentTutorialStep}`);
+                currentStep.classList.add('hidden');
+                
+                this.currentTutorialStep++;
+                const nextStep = document.getElementById(`step${this.currentTutorialStep}`);
+                if (nextStep) {
+                    nextStep.classList.remove('hidden');
+                } else {
+                    this.completeTutorial();
+                }
+            }
+            
+            completeTutorial() {
+                this.triggerHapticFeedback('success');
+                document.getElementById('tutorialOverlay').classList.add('hidden');
+                localStorage.setItem('aatmaTutorialCompleted', 'true');
+                this.showStatusMessage('Welcome to Aatma! Ready for paranormal investigation.', 'success');
             }
             
             checkSensorSupport() {
@@ -744,24 +1196,32 @@
             
             async requestSensorPermission() {
                 try {
+                    this.triggerHapticFeedback('light');
+                    
                     if (typeof DeviceMotionEvent.requestPermission === 'function') {
                         const permission = await DeviceMotionEvent.requestPermission();
                         if (permission === 'granted') {
                             this.sensorPermissionGranted = true;
                             document.getElementById('permissionPrompt').classList.add('hidden');
                             this.startSensorMonitoring();
+                            this.triggerHapticFeedback('success');
+                            this.showStatusMessage('Sensors activated successfully', 'success');
                             console.log('Sensor permission granted');
                         } else {
+                            this.showStatusMessage('Sensor access denied. Using simulation mode.', 'warning');
+                            this.enableFallbackMode();
                             console.log('Sensor permission denied');
                         }
                     } else {
                         this.sensorPermissionGranted = true;
                         document.getElementById('permissionPrompt').classList.add('hidden');
                         this.startSensorMonitoring();
+                        this.showStatusMessage('Sensors ready', 'success');
                         console.log('Sensor access enabled');
                     }
                 } catch (error) {
                     console.log('Sensor permission error:', error);
+                    this.showStatusMessage('Sensor error. Using simulation mode.', 'info');
                     this.enableFallbackMode();
                 }
             }
@@ -807,7 +1267,7 @@
                 
                 emfValue.textContent = Math.round(value);
                 
-                let color, shadowColor;
+                let color, shadowColor, anomalyLevel = false;
                 if (value < 20) {
                     color = '#10b981';
                     shadowColor = 'rgba(16, 185, 129, 0.6)';
@@ -817,17 +1277,24 @@
                 } else if (value < 70) {
                     color = '#fb923c';
                     shadowColor = 'rgba(251, 146, 60, 0.6)';
+                    anomalyLevel = true;
                 } else {
                     color = '#ef4444';
                     shadowColor = 'rgba(239, 68, 68, 0.6)';
+                    anomalyLevel = true;
                     this.sessionStats.anomalyCount++;
                     emfCircle.classList.add('active');
+                    this.triggerHapticFeedback('heavy');
                     setTimeout(() => emfCircle.classList.remove('active'), 2000);
                 }
                 
                 emfCircle.style.borderColor = color;
                 emfValue.style.color = color;
                 emfCircle.style.boxShadow = `0 0 25px ${shadowColor}`;
+                
+                if (anomalyLevel && Math.random() > 0.7) {
+                    this.triggerHapticFeedback('light');
+                }
             }
             
             recordEMFReading(value) {
@@ -848,6 +1315,8 @@
             }
             
             toggleScanning() {
+                this.triggerHapticFeedback('medium');
+                
                 if (!this.sensorPermissionGranted) {
                     this.requestSensorPermission();
                     return;
@@ -861,6 +1330,11 @@
             }
             
             startScanning() {
+                if (!this.isCalibrating) {
+                    this.startCalibration();
+                    return;
+                }
+                
                 this.isScanning = true;
                 this.sessionTime = 0;
                 this.sessionStats = {
@@ -870,8 +1344,11 @@
                     startTime: new Date()
                 };
                 
-                document.getElementById('mainButton').textContent = 'Stop Paranormal Scan';
-                document.getElementById('mainButton').className = 'main-button stop-scanning';
+                const button = document.getElementById('mainButton');
+                button.className = 'main-button stop-scanning';
+                const powerIcon = button.querySelector('.power-icon');
+                powerIcon.style.backgroundColor = '#ef4444';
+                powerIcon.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.6)';
                 document.getElementById('sessionStatus').textContent = 'Scanning for Paranormal Activity...';
                 document.getElementById('scanningIndicator').classList.add('active');
                 
@@ -882,20 +1359,70 @@
                 
                 this.wordGenerationTimer = setInterval(() => {
                     this.generateWord();
-                }, 4000);
+                }, 12000); // Much slower - every 12 seconds
                 
                 this.sensorUpdateTimer = setInterval(() => {
                     this.updateSensorReadings();
                 }, 500);
                 
+                this.triggerHapticFeedback('success');
                 console.log('Paranormal scanning started');
+            }
+            
+            startCalibration() {
+                this.isCalibrating = true;
+                this.calibrationData = [];
+                let calibrationTime = 0;
+                
+                this.showStatusMessage('Calibrating sensors... Hold device still', 'info');
+                const button = document.getElementById('mainButton');
+                const powerIcon = button.querySelector('.power-icon');
+                button.disabled = true;
+                button.style.opacity = '0.6';
+                powerIcon.style.opacity = '0.5';
+                
+                this.calibrationTimer = setInterval(() => {
+                    calibrationTime++;
+                    
+                    if (calibrationTime <= 5) {
+                        this.showStatusMessage(`Calibrating... ${6 - calibrationTime}`, 'info');
+                        
+                        // Collect baseline readings
+                        const simulatedReading = Math.random() * 10 + 5; // Low baseline
+                        this.calibrationData.push(simulatedReading);
+                    } else {
+                        this.completeCalibration();
+                    }
+                }, 1000);
+            }
+            
+            completeCalibration() {
+                clearInterval(this.calibrationTimer);
+                
+                // Calculate baseline from calibration data
+                this.emfBaseline = this.calibrationData.reduce((a, b) => a + b, 0) / this.calibrationData.length;
+                
+                this.isCalibrating = false;
+                const button = document.getElementById('mainButton');
+                const powerIcon = button.querySelector('.power-icon');
+                button.disabled = false;
+                button.style.opacity = '1';
+                powerIcon.style.opacity = '1';
+                
+                this.triggerHapticFeedback('success');
+                this.showStatusMessage(`Calibration complete. Baseline: ${this.emfBaseline.toFixed(1)}`, 'success');
+                
+                console.log(`Sensor calibration completed. Baseline: ${this.emfBaseline.toFixed(1)}`);
             }
             
             stopScanning() {
                 this.isScanning = false;
                 
-                document.getElementById('mainButton').textContent = 'Start Paranormal Scan';
-                document.getElementById('mainButton').className = 'main-button start-scanning';
+                const button = document.getElementById('mainButton');
+                button.className = 'main-button start-scanning';
+                const powerIcon = button.querySelector('.power-icon');
+                powerIcon.style.backgroundColor = '';
+                powerIcon.style.boxShadow = '';
                 document.getElementById('sessionStatus').textContent = 'Session Completed';
                 document.getElementById('scanningIndicator').classList.remove('active');
                 
@@ -981,16 +1508,47 @@
                 const categoryElement = document.getElementById('wordCategory');
                 const displayElement = document.getElementById('wordDisplay');
                 
+                // Add subtle haptic feedback for word generation
+                this.triggerHapticFeedback('light');
+                
                 wordElement.textContent = word;
                 categoryElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                
+                // Enhanced visual feedback
+                displayElement.style.borderColor = 'rgba(139, 92, 246, 0.8)';
+                displayElement.style.boxShadow = '0 0 30px rgba(139, 92, 246, 0.4)';
                 
                 wordElement.classList.add('show');
                 categoryElement.classList.add('show');
                 displayElement.classList.add('active');
                 
+                // Add to word history
+                this.addToWordHistory(word);
+                
                 setTimeout(() => {
                     this.hideCurrentWord();
-                }, 3000);
+                }, 5000); // Keep visible longer
+            }
+            
+            addToWordHistory(word) {
+                this.wordHistory.unshift(word);
+                if (this.wordHistory.length > this.maxWordHistory) {
+                    this.wordHistory.pop();
+                }
+                this.updateWordHistoryDisplay();
+            }
+            
+            updateWordHistoryDisplay() {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+                
+                this.wordHistory.forEach((word, index) => {
+                    const wordElement = document.createElement('div');
+                    wordElement.className = 'history-word';
+                    wordElement.textContent = word;
+                    wordElement.style.animationDelay = `${index * 0.1}s`;
+                    historyList.appendChild(wordElement);
+                });
             }
             
             hideCurrentWord() {
@@ -1009,15 +1567,36 @@
             }
             
             speakWord(word) {
-                if (this.speechSynthesis && this.speechSynthesis.speak) {
-                    const utterance = new SpeechSynthesisUtterance(word);
-                    utterance.rate = 0.8;
-                    utterance.pitch = 0.9;
-                    utterance.volume = 0.8;
+                if ('speechSynthesis' in window) {
+                    // Stop any ongoing speech
+                    window.speechSynthesis.cancel();
                     
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.rate = 0.7;
+                    utterance.pitch = 0.8;
+                    utterance.volume = 0.9;
+                    utterance.lang = 'en-US';
+                    
+                    // Add error handling
+                    utterance.onerror = (event) => {
+                        console.log('Speech synthesis error:', event.error);
+                    };
+                    
+                    utterance.onend = () => {
+                        console.log('Speech completed for:', word);
+                    };
+                    
+                    // Ensure speech synthesis is ready
                     setTimeout(() => {
-                        this.speechSynthesis.speak(utterance);
-                    }, 200);
+                        try {
+                            window.speechSynthesis.speak(utterance);
+                            console.log('Speaking word:', word);
+                        } catch (error) {
+                            console.log('Speech synthesis failed:', error);
+                        }
+                    }, 300);
+                } else {
+                    console.log('Speech synthesis not supported');
                 }
             }
             
@@ -1033,6 +1612,7 @@
                     pressureStatus.textContent = 'Anomaly';
                     pressureStatus.style.background = 'rgba(239, 68, 68, 0.3)';
                     pressureStatus.style.color = '#ef4444';
+                    this.triggerHapticFeedback('light');
                 } else if (Math.abs(variation) > 2) {
                     pressureStatus.textContent = 'Fluctuating';
                     pressureStatus.style.background = 'rgba(245, 158, 11, 0.3)';
@@ -1044,23 +1624,277 @@
                 }
                 
                 if (!('DeviceMotionEvent' in window) || !this.sensorPermissionGranted) {
-                    const simulatedEMF = Math.random() * 100 * (this.sensitivity / 50);
+                    // Enhanced simulation with baseline consideration
+                    const baseVariation = (Math.random() - 0.5) * 20;
+                    const environmentalNoise = Math.random() * 15;
+                    const sensitivityFactor = this.sensitivity / 50;
+                    
+                    let simulatedEMF = this.emfBaseline + baseVariation + environmentalNoise;
+                    simulatedEMF = Math.max(0, simulatedEMF * sensitivityFactor);
+                    
+                    // Add occasional spikes for more realistic behavior
+                    if (Math.random() > 0.95) {
+                        simulatedEMF += Math.random() * 40;
+                    }
+                    
                     this.updateEMFDisplay(simulatedEMF);
                     this.recordEMFReading(simulatedEMF);
                 }
             }
             
             adjustSensitivity(delta) {
+                this.triggerHapticFeedback('light');
                 this.sensitivity = Math.max(10, Math.min(100, this.sensitivity + delta));
                 document.getElementById('sensitivityValue').textContent = this.sensitivity + '%';
                 document.getElementById('sensitivityFill').style.width = this.sensitivity + '%';
+                
+                // Visual feedback for sensitivity changes
+                const fillElement = document.getElementById('sensitivityFill');
+                fillElement.style.transition = 'width 0.3s ease, box-shadow 0.3s ease';
+                fillElement.style.boxShadow = '0 0 15px rgba(139, 92, 246, 0.8)';
+                setTimeout(() => {
+                    fillElement.style.boxShadow = '';
+                }, 500);
+                
                 this.saveSettings();
             }
             
             switchTab(index) {
+                this.triggerHapticFeedback('light');
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
                 document.querySelectorAll('.nav-item')[index].classList.add('active');
+                
+                this.currentTab = index;
+                this.showTabContent(index);
                 console.log(`Switched to tab ${index}`);
+            }
+            
+            showTabContent(index) {
+                // Show/hide appropriate content based on tab
+                switch(index) {
+                    case 0: // Scan
+                        this.showScanInterface();
+                        break;
+                    case 1: // History
+                        this.showHistoryInterface();
+                        break;
+                    case 2: // Words
+                        this.showWordsInterface();
+                        break;
+                    case 3: // Settings
+                        this.showSettingsInterface();
+                        break;
+                }
+            }
+            
+            showScanInterface() {
+                // Show main scanning interface
+                const mainElements = ['.sensor-grid', '.session-display', '.word-display', '.word-history', '.sensitivity-control', '.control-section'];
+                mainElements.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) element.style.display = '';
+                });
+                
+                // Hide other interfaces
+                this.hideSecondaryInterfaces();
+            }
+            
+            showHistoryInterface() {
+                this.hideMainInterface();
+                this.createHistoryView();
+            }
+            
+            showWordsInterface() {
+                this.hideMainInterface();
+                this.createWordsView();
+            }
+            
+            showSettingsInterface() {
+                this.hideMainInterface();
+                this.createSettingsView();
+            }
+            
+            hideMainInterface() {
+                const elements = ['.sensor-grid', '.session-display', '.word-display', '.word-history', '.sensitivity-control', '.control-section'];
+                elements.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) element.style.display = 'none';
+                });
+            }
+            
+            hideSecondaryInterfaces() {
+                const sections = ['history-content', 'words-content', 'settings-content'];
+                sections.forEach(sectionId => {
+                    const element = document.getElementById(sectionId);
+                    if (element) element.style.display = 'none';
+                });
+            }
+            
+            createHistoryView() {
+                let historySection = document.getElementById('history-content');
+                const container = document.querySelector('.container');
+                
+                if (!historySection) {
+                    historySection = document.createElement('div');
+                    historySection.id = 'history-content';
+                    historySection.className = 'tab-content';
+                    historySection.innerHTML = `
+                        <div class="section-header">
+                            <h2 style="color: var(--primary-color); margin-bottom: 8px;">Session History</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Past paranormal investigation sessions</p>
+                        </div>
+                        <div class="history-container" id="sessionHistoryList">
+                            <div class="empty-state">No sessions recorded yet</div>
+                        </div>
+                    `;
+                    container.appendChild(historySection);
+                }
+                
+                historySection.style.display = 'block';
+                this.loadSessionHistory();
+            }
+            
+            createWordsView() {
+                let wordsSection = document.getElementById('words-content');
+                const container = document.querySelector('.container');
+                
+                if (!wordsSection) {
+                    wordsSection = document.createElement('div');
+                    wordsSection.id = 'words-content';
+                    wordsSection.className = 'tab-content';
+                    wordsSection.innerHTML = `
+                        <div class="section-header">
+                            <h2 style="color: var(--primary-color); margin-bottom: 8px;">Current Session Words</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Words generated this session</p>
+                        </div>
+                        <div class="session-words" id="sessionWordsList">
+                            <div class="empty-state">Start scanning to see words</div>
+                        </div>
+                        <div class="word-stats">
+                            <div class="stat-card">
+                                <span class="stat-number">${this.sessionStats.wordCount}</span>
+                                <span class="stat-label">Words This Session</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">50,000+</span>
+                                <span class="stat-label">Total Database</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(wordsSection);
+                }
+                
+                wordsSection.style.display = 'block';
+                this.updateSessionWordsDisplay();
+            }
+            
+            createSettingsView() {
+                let settingsSection = document.getElementById('settings-content');
+                const container = document.querySelector('.container');
+                
+                if (!settingsSection) {
+                    settingsSection = document.createElement('div');
+                    settingsSection.id = 'settings-content';
+                    settingsSection.className = 'tab-content';
+                    settingsSection.innerHTML = `
+                        <div class="section-header">
+                            <h2 style="color: var(--primary-color); margin-bottom: 8px;">Device Settings</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Configure your paranormal device</p>
+                        </div>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <label>Language</label>
+                                    <span>Communication language</span>
+                                </div>
+                                <select id="languageSelect" style="background: rgba(30,30,30,0.8); color: white; border: 1px solid var(--primary-color); padding: 8px; border-radius: 8px;">
+                                    <option value="english">English</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="hindi">Hindi</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <label>Battery Mode</label>
+                                    <span>${this.batteryOptimized ? 'Power saving enabled' : 'Standard performance'}</span>
+                                </div>
+                                <button onclick="aatmaDevice.toggleBatteryMode()" style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px;">
+                                    ${this.batteryOptimized ? 'Disable' : 'Enable'}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="app-info" style="margin-top: 30px; padding: 20px; background: rgba(30,30,30,0.5); border-radius: 12px; text-align: center;">
+                            <p style="color: var(--primary-color); font-weight: bold;">Aatma v2.0</p>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Paranormal Communication Device</p>
+                            <p style="color: var(--text-secondary); font-size: 0.8rem;">iPhone Optimized with Haptic Feedback</p>
+                        </div>
+                    `;
+                    container.appendChild(settingsSection);
+                }
+                
+                settingsSection.style.display = 'block';
+            }
+            
+            loadSessionHistory() {
+                try {
+                    const sessions = JSON.parse(localStorage.getItem('aatmaSessions') || '[]');
+                    const historyList = document.getElementById('sessionHistoryList');
+                    
+                    if (sessions.length === 0) {
+                        historyList.innerHTML = '<div class="empty-state">No sessions recorded yet</div>';
+                        return;
+                    }
+                    
+                    historyList.innerHTML = sessions.reverse().map(session => `
+                        <div class="history-item" style="background: rgba(30,30,30,0.8); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="color: var(--primary-color); font-weight: bold;">${new Date(session.date).toLocaleDateString()}</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">${new Date(session.date).toLocaleTimeString()}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--accent-color);">${Math.floor(session.duration / 60)}:${(session.duration % 60).toString().padStart(2, '0')}</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.85rem;">${session.wordCount} words</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.log('Could not load session history:', error);
+                }
+            }
+            
+            updateSessionWordsDisplay() {
+                const wordsList = document.getElementById('sessionWordsList');
+                if (!wordsList) return;
+                
+                if (this.wordHistory.length === 0) {
+                    wordsList.innerHTML = '<div class="empty-state">Start scanning to see words</div>';
+                    return;
+                }
+                
+                wordsList.innerHTML = this.wordHistory.map(word => `
+                    <div class="session-word-item" style="background: rgba(139,92,246,0.2); color: var(--primary-color); padding: 8px 16px; border-radius: 20px; margin: 4px; display: inline-block; border: 1px solid rgba(139,92,246,0.4);">
+                        ${word}
+                    </div>
+                `).join('');
+            }
+            
+            toggleBatteryMode() {
+                this.batteryOptimized = !this.batteryOptimized;
+                if (this.batteryOptimized) {
+                    this.enableBatteryOptimization();
+                } else {
+                    this.performanceMode = 'standard';
+                    this.saveSettings();
+                    this.showStatusMessage('Standard performance mode enabled', 'success');
+                }
+                
+                // Refresh settings view if open
+                if (this.currentTab === 3) {
+                    document.getElementById('settings-content').remove();
+                    this.createSettingsView();
+                }
             }
             
             saveSession() {
@@ -1091,6 +1925,21 @@
                         document.getElementById('sensitivityValue').textContent = this.sensitivity + '%';
                         document.getElementById('sensitivityFill').style.width = this.sensitivity + '%';
                     }
+                    if (settings.batteryOptimized !== undefined) {
+                        this.batteryOptimized = settings.batteryOptimized;
+                    }
+                    if (settings.performanceMode) {
+                        this.performanceMode = settings.performanceMode;
+                    }
+                    
+                    // Auto-detect battery level and suggest optimization
+                    if ('getBattery' in navigator) {
+                        navigator.getBattery().then(battery => {
+                            if (battery.level < 0.3 && !this.batteryOptimized) {
+                                this.showStatusMessage('Low battery detected. Consider enabling power saving mode.', 'warning');
+                            }
+                        });
+                    }
                 } catch (error) {
                     console.log('Could not load settings:', error);
                 }
@@ -1099,7 +1948,9 @@
             saveSettings() {
                 try {
                     const settings = {
-                        sensitivity: this.sensitivity
+                        sensitivity: this.sensitivity,
+                        batteryOptimized: this.batteryOptimized,
+                        performanceMode: this.performanceMode
                     };
                     localStorage.setItem('aatmaSettings', JSON.stringify(settings));
                 } catch (error) {
@@ -1107,9 +1958,71 @@
                 }
             }
             
+            enableBatteryOptimization() {
+                this.batteryOptimized = true;
+                this.performanceMode = 'eco';
+                
+                // Reduce update frequencies
+                clearInterval(this.sensorUpdateTimer);
+                clearInterval(this.wordGenerationTimer);
+                
+                if (this.isScanning) {
+                    this.sensorUpdateTimer = setInterval(() => {
+                        this.updateSensorReadings();
+                    }, 1000); // Slower updates
+                    
+                    this.wordGenerationTimer = setInterval(() => {
+                        this.generateWord();
+                    }, 6000); // Less frequent word generation
+                }
+                
+                this.showStatusMessage('Battery optimization enabled', 'success');
+                this.saveSettings();
+            }
+            
             updateUI() {
                 this.updateTimerDisplay();
                 this.updateSessionStats();
+            }
+            
+            triggerHapticFeedback(type = 'light') {
+                if (navigator.vibrate) {
+                    switch (type) {
+                        case 'light':
+                            navigator.vibrate(10);
+                            break;
+                        case 'medium':
+                            navigator.vibrate(50);
+                            break;
+                        case 'heavy':
+                            navigator.vibrate([100, 50, 100]);
+                            break;
+                        case 'success':
+                            navigator.vibrate([50, 30, 50]);
+                            break;
+                        case 'error':
+                            navigator.vibrate([100, 50, 100, 50, 100]);
+                            break;
+                        default:
+                            navigator.vibrate(20);
+                    }
+                }
+            }
+            
+            showStatusMessage(message, type = 'info') {
+                const statusElement = document.getElementById('sessionStatus');
+                const originalText = statusElement.textContent;
+                
+                statusElement.textContent = message;
+                statusElement.style.color = type === 'success' ? '#10b981' : 
+                                           type === 'warning' ? '#f59e0b' : 
+                                           type === 'error' ? '#ef4444' : 
+                                           '#06b6d4';
+                
+                setTimeout(() => {
+                    statusElement.textContent = originalText;
+                    statusElement.style.color = '';
+                }, 3000);
             }
         }
         
@@ -1131,6 +2044,14 @@
             aatmaDevice.switchTab(index);
         }
         
+        function nextTutorialStep() {
+            aatmaDevice.nextTutorialStep();
+        }
+        
+        function completeTutorial() {
+            aatmaDevice.completeTutorial();
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
             aatmaDevice = new AatmaDevice();
         });
@@ -1147,20 +2068,55 @@
             }, 100);
         });
         
+        // Enhanced touch handling for iOS
         document.addEventListener('touchstart', (event) => {
             if (event.touches.length > 1) {
                 event.preventDefault();
             }
-        });
+            
+            // Add visual feedback for touch events
+            const target = event.target.closest('.main-button, .permission-btn, .sensitivity-btn, .nav-item');
+            if (target) {
+                target.style.transform = 'scale(0.95)';
+                target.style.opacity = '0.8';
+            }
+        }, { passive: false });
         
-        let lastTouchEnd = 0;
         document.addEventListener('touchend', (event) => {
-            const now = (new Date()).getTime();
+            const now = Date.now();
             if (now - lastTouchEnd <= 300) {
                 event.preventDefault();
             }
             lastTouchEnd = now;
+            
+            // Reset visual feedback
+            const target = event.target.closest('.main-button, .permission-btn, .sensitivity-btn, .nav-item');
+            if (target) {
+                setTimeout(() => {
+                    target.style.transform = '';
+                    target.style.opacity = '';
+                }, 150);
+            }
         }, false);
+        
+        let lastTouchEnd = 0;
+        
+        // Prevent iOS rubber band scrolling
+        document.addEventListener('touchmove', (event) => {
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Handle device orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                document.body.style.height = window.innerHeight + 'px';
+                if (aatmaDevice && aatmaDevice.isScanning) {
+                    aatmaDevice.showStatusMessage('Orientation changed', 'info');
+                }
+            }, 100);
+        });
     </script>
 </body>
 </html>
