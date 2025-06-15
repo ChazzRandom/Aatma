@@ -94,21 +94,22 @@
             border: 1px solid rgba(139, 92, 246, 0.3);
         }
         
-        .sensor-layout {
-            display: grid;
-            grid-template-columns: 50px 1fr 90px;
-            align-items: center;
+        .top-sensors {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             height: 250px;
             margin: 15px 0;
             position: relative;
             gap: 15px;
         }
 
-        .center-word-area {
+        .middle-word-area {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            margin: 20px 0;
+            padding: 0 15px;
         }
 
         .right-emf-container {
@@ -271,7 +272,6 @@
 
         .word-display {
             width: 100%;
-            max-width: 280px;
             height: 300px;
             display: flex;
             flex-direction: column;
@@ -281,7 +281,7 @@
             border-radius: 12px;
             border: 2px solid rgba(139, 92, 246, 0.4);
             backdrop-filter: blur(15px);
-            padding: 15px;
+            padding: 20px;
             position: relative;
             overflow: hidden;
         }
@@ -524,17 +524,10 @@
         <div class="main-content">
             <!-- Scan Tab Content -->
             <div class="tab-content" id="tab0">
-                <div class="sensor-layout">
+                <div class="top-sensors">
                     <div class="left-scanner">
                         <div class="scanner-track">
                             <div class="progress-dot" id="progressDot"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="center-word-area">
-                        <div class="word-display" id="wordDisplay">
-                            <div class="current-word" id="currentWord"></div>
-                            <div class="word-category" id="wordCategory"></div>
                         </div>
                     </div>
                     
@@ -554,6 +547,14 @@
                         <button class="vertical-scan-button" id="scanButton" onclick="toggleScanning()">
                             <span class="scan-text">SCAN</span>
                         </button>
+                    </div>
+                </div>
+
+                <div class="middle-word-area">
+                    <div class="word-display" id="wordDisplay">
+                        <div class="current-word" id="currentWord"></div>
+                        <div class="word-category" id="wordCategory"></div>
+                        <button class="test-speech-btn" onclick="testSpeech()" style="margin-top: 10px; padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 0.9rem;">Test Speech</button>
                     </div>
                 </div>
             </div>
@@ -719,9 +720,10 @@
                     this.updateTimerDisplay();
                 }, 1000);
                 
-                this.wordGenerationTimer = setInterval(() => {
-                    this.generateWord();
-                }, 45000 + Math.random() * 30000); // 45-75 seconds - realistic paranormal timing
+                // Initialize sensor monitoring for word triggers
+                this.lastWordTime = 0;
+                this.sensorTriggerThreshold = 0.3; // Minimum intensity to trigger word
+                this.wordCooldown = 5000; // 5 seconds between words minimum
                 
                 this.sensorUpdateTimer = setInterval(() => {
                     this.updateSensorReadings();
@@ -770,18 +772,66 @@
             generateWord() {
                 if (!this.isScanning) return;
                 
-                const categories = Object.keys(this.wordBank);
-                const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
-                const words = this.wordBank[selectedCategory];
-                const selectedWord = words[Math.floor(Math.random() * words.length)];
+                // Use actual sensor readings to determine word category and selection
+                const sensorIntensity = this.calculateSensorIntensity();
+                const category = this.selectCategoryBySensorData(sensorIntensity);
+                const words = this.wordBank[category];
                 
-                this.displayWord(selectedWord, selectedCategory);
+                // Select word based on sensor data hash for consistency
+                const sensorHash = this.hashSensorData();
+                const selectedWord = words[sensorHash % words.length];
+                
+                this.displayWord(selectedWord, category);
                 this.speakWord(selectedWord);
                 
                 this.sessionStats.wordCount++;
                 document.getElementById('wordCount').textContent = this.sessionStats.wordCount;
                 
-                console.log(`Generated word: ${selectedWord} (${selectedCategory})`);
+                console.log(`Sensor-triggered word: ${selectedWord} (${category}) - Intensity: ${sensorIntensity.toFixed(2)}`);
+            }
+            
+            calculateSensorIntensity() {
+                // Calculate combined sensor intensity from accelerometer and magnetometer
+                const accel = this.sensorReadings.accelerometer;
+                const mag = this.sensorReadings.magnetometer;
+                
+                // Calculate magnitude of accelerometer changes from baseline
+                const accelMagnitude = Math.sqrt(
+                    Math.pow(accel.x - this.baseline.accelerometer.x, 2) +
+                    Math.pow(accel.y - this.baseline.accelerometer.y, 2) +
+                    Math.pow(accel.z - this.baseline.accelerometer.z, 2)
+                );
+                
+                // Calculate magnitude of magnetometer changes from baseline
+                const magMagnitude = Math.sqrt(
+                    Math.pow(mag.x - this.baseline.magnetometer.x, 2) +
+                    Math.pow(mag.y - this.baseline.magnetometer.y, 2) +
+                    Math.pow(mag.z - this.baseline.magnetometer.z, 2)
+                );
+                
+                // Combine readings with weights (magnetometer more important for EMF)
+                return (accelMagnitude * 0.3 + magMagnitude * 0.7) * this.sensitivity;
+            }
+            
+            selectCategoryBySensorData(intensity) {
+                // Map sensor intensity to paranormal categories
+                if (intensity > 0.8) return 'spirits';
+                if (intensity > 0.6) return 'emotions';
+                if (intensity > 0.4) return 'presence';
+                if (intensity > 0.2) return 'communication';
+                return 'general';
+            }
+            
+            hashSensorData() {
+                // Create consistent hash from current sensor readings
+                const data = `${this.sensorReadings.accelerometer.x.toFixed(3)},${this.sensorReadings.accelerometer.y.toFixed(3)},${this.sensorReadings.magnetometer.x.toFixed(3)}`;
+                let hash = 0;
+                for (let i = 0; i < data.length; i++) {
+                    const char = data.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32-bit integer
+                }
+                return Math.abs(hash);
             }
             
             displayWord(word, category) {
@@ -871,27 +921,88 @@
             updateSensorReadings() {
                 if (!this.isScanning) return;
                 
-                let emfReading = this.detectElectromagneticFields();
+                // Request device motion and orientation sensors
+                this.requestDeviceSensors();
+                
+                // Calculate EMF from actual sensor data
+                let emfReading = this.calculateEMFFromSensors();
                 this.updateEMFDisplay(emfReading);
                 this.recordEMFReading(emfReading);
+                
+                // Check for sensor-triggered word generation
+                this.checkSensorTrigger(emfReading);
             }
             
-            detectElectromagneticFields() {
-                let baselineEMF = 2 + (Math.random() * 3);
-                let detectedEMF = baselineEMF;
-                
-                if (Math.random() > 0.98) {
-                    detectedEMF += Math.random() * 20;
+            requestDeviceSensors() {
+                // Request accelerometer and magnetometer access
+                if ('DeviceMotionEvent' in window && !this.sensorsRequested) {
+                    this.sensorsRequested = true;
+                    
+                    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                        // iOS 13+ permission request
+                        DeviceMotionEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    this.startDeviceMotionTracking();
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        // Android or older iOS
+                        this.startDeviceMotionTracking();
+                    }
                 }
+            }
+            
+            startDeviceMotionTracking() {
+                window.addEventListener('devicemotion', (event) => {
+                    this.deviceMotion = event;
+                    
+                    if (event.acceleration) {
+                        this.sensorReadings.accelerometer = {
+                            x: event.acceleration.x || 0,
+                            y: event.acceleration.y || 0,
+                            z: event.acceleration.z || 0
+                        };
+                    }
+                    
+                    if (event.rotationRate) {
+                        this.sensorReadings.magnetometer = {
+                            x: event.rotationRate.alpha || 0,
+                            y: event.rotationRate.beta || 0,
+                            z: event.rotationRate.gamma || 0
+                        };
+                    }
+                });
                 
-                if (Math.random() > 0.999) {
-                    detectedEMF += Math.random() * 50;
-                }
+                console.log('Device motion tracking enabled');
+            }
+            
+            calculateEMFFromSensors() {
+                // Calculate EMF reading based on actual sensor intensity
+                const intensity = this.calculateSensorIntensity();
                 
+                // Convert sensor intensity to EMF scale (0-100)
+                let emfValue = intensity * 100;
+                
+                // Apply sensitivity multiplier
                 const sensitivityMultiplier = this.sensitivity / 50;
-                detectedEMF = detectedEMF * sensitivityMultiplier;
+                emfValue *= sensitivityMultiplier;
                 
-                return Math.min(100, Math.max(0, detectedEMF));
+                return Math.min(100, Math.max(0, emfValue));
+            }
+            
+            checkSensorTrigger(emfReading) {
+                const currentTime = Date.now();
+                
+                // Trigger word generation based on EMF spikes
+                if (emfReading > 30 && // Significant EMF reading
+                    currentTime - this.lastWordTime > this.wordCooldown) {
+                    
+                    console.log(`EMF spike detected: ${emfReading.toFixed(1)}% - Generating word`);
+                    this.generateWord();
+                    this.lastWordTime = currentTime;
+                }
             }
             
             updateEMFDisplay(value) {
@@ -980,6 +1091,57 @@
         }
 
 
+
+        function testSpeech() {
+            console.log('Testing speech functionality');
+            
+            // Show test word immediately
+            const wordElement = document.getElementById('currentWord');
+            const categoryElement = document.getElementById('wordCategory');
+            wordElement.textContent = 'HELLO';
+            categoryElement.textContent = 'Speech Test';
+            
+            // Test speech synthesis
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance('Hello, this is a speech test');
+                utterance.rate = 0.8;
+                utterance.volume = 1.0;
+                utterance.lang = 'en-US';
+                
+                utterance.onstart = () => {
+                    console.log('Test speech started');
+                };
+                
+                utterance.onend = () => {
+                    console.log('Test speech completed');
+                    setTimeout(() => {
+                        wordElement.textContent = '';
+                        categoryElement.textContent = '';
+                    }, 2000);
+                };
+                
+                utterance.onerror = (event) => {
+                    console.error('Test speech error:', event.error);
+                    wordElement.textContent = 'Speech Error';
+                    categoryElement.textContent = 'Check Console';
+                };
+                
+                try {
+                    window.speechSynthesis.speak(utterance);
+                    console.log('Speech synthesis triggered successfully');
+                } catch (error) {
+                    console.error('Speech synthesis failed:', error);
+                    wordElement.textContent = 'Speech Failed';
+                    categoryElement.textContent = error.message;
+                }
+            } else {
+                console.error('Speech synthesis not supported');
+                wordElement.textContent = 'Not Supported';
+                categoryElement.textContent = 'Speech synthesis unavailable';
+            }
+        }
 
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
