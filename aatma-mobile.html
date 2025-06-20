@@ -551,12 +551,6 @@
                 </div>
 
                 <div class="middle-word-area">
-                    <!-- Permission Alert for iOS -->
-                    <div class="permission-alert" id="permissionAlert" style="display: none;">
-                        <p style="margin: 0 0 10px 0; color: var(--text-primary);">Enable device sensors for EMF detection</p>
-                        <button class="permission-btn" onclick="requestSensorPermission()">Enable Sensors</button>
-                    </div>
-                    
                     <div class="word-display" id="wordDisplay">
                         <div class="current-word" id="currentWord"></div>
                         <div class="word-category" id="wordCategory"></div>
@@ -680,16 +674,8 @@
             }
 
             showPermissionAlertIfNeeded() {
-                // Show permission alert on iOS devices that need explicit permission
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                const needsPermission = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
-                
-                if (isIOS && needsPermission) {
-                    const permissionAlert = document.getElementById('permissionAlert');
-                    if (permissionAlert) {
-                        permissionAlert.style.display = 'block';
-                    }
-                }
+                // Permission requests are now handled in the Scan button
+                console.log('Permission requests integrated with Scan button');
             }
             
             async checkSensorSupport() {
@@ -887,8 +873,10 @@
                 }
             }
             
-            toggleScanning() {
+            async toggleScanning() {
                 if (!this.isScanning) {
+                    // Request sensor permissions first if needed
+                    await this.requestSensorPermission();
                     this.startScanning();
                 } else {
                     this.stopScanning();
@@ -911,10 +899,18 @@
                 }
                 
                 const button = document.getElementById('scanButton');
-                const scanText = button.querySelector('.scan-text');
-                scanText.textContent = 'STOP';
-                button.classList.add('scanning');
-                document.getElementById('sessionStatus').textContent = 'Scanning for Paranormal Activity...';
+                if (button) {
+                    const scanText = button.querySelector('.scan-text');
+                    if (scanText) {
+                        scanText.textContent = 'STOP';
+                    }
+                    button.classList.add('scanning');
+                }
+                
+                const statusElement = document.getElementById('sessionStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Scanning for Paranormal Activity...';
+                }
                 
                 // Start sensor monitoring for real device sensors
                 this.startSensorMonitoring();
@@ -926,8 +922,8 @@
                 
                 // Initialize sensor monitoring for word triggers
                 this.lastWordTime = 0;
-                this.sensorTriggerThreshold = 0.02; // Lower threshold for better sensitivity
-                this.wordCooldown = 3000; // 3 seconds between words minimum
+                this.sensorTriggerThreshold = 0.02;
+                this.wordCooldown = 3000;
                 
                 this.sensorUpdateTimer = setInterval(() => {
                     this.updateSensorReadings();
@@ -952,16 +948,33 @@
                 }
                 
                 const button = document.getElementById('scanButton');
-                const scanText = button.querySelector('.scan-text');
-                scanText.textContent = 'SCAN';
-                button.classList.remove('scanning');
+                if (button) {
+                    const scanText = button.querySelector('.scan-text');
+                    if (scanText) {
+                        scanText.textContent = 'SCAN';
+                    }
+                    button.classList.remove('scanning');
+                }
                 
                 clearInterval(this.sessionTimer);
-                clearInterval(this.fallbackTimer);
-                clearInterval(this.sensorUpdateTimer);
+                if (this.fallbackTimer) clearInterval(this.fallbackTimer);
+                if (this.sensorUpdateTimer) clearInterval(this.sensorUpdateTimer);
                 
                 this.hideCurrentWord();
                 console.log('Mobile scanning stopped');
+            }
+
+            hideCurrentWord() {
+                const wordElement = document.getElementById('currentWord');
+                const categoryElement = document.getElementById('wordCategory');
+                
+                if (wordElement) {
+                    wordElement.textContent = '';
+                    wordElement.style.opacity = '0';
+                }
+                if (categoryElement) {
+                    categoryElement.textContent = '';
+                }
             }
             
             updateTimerDisplay() {
@@ -1421,9 +1434,9 @@
         // Global functions for button events
         let aatmaDevice;
         
-        function toggleScanning() {
+        async function toggleScanning() {
             if (window.aatmaDevice) {
-                window.aatmaDevice.toggleScanning();
+                await window.aatmaDevice.toggleScanning();
             } else {
                 console.log('Device not initialized');
             }
@@ -1563,10 +1576,10 @@
                 
                 const scanBtn = document.getElementById('scanButton');
                 if (scanBtn) {
-                    scanBtn.addEventListener('click', () => {
+                    scanBtn.addEventListener('click', async () => {
                         console.log('Scan button clicked');
                         if (window.aatmaDevice) {
-                            window.aatmaDevice.toggleScanning();
+                            await window.aatmaDevice.toggleScanning();
                         }
                     });
                 }
