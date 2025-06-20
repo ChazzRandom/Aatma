@@ -956,12 +956,31 @@
                     button.classList.remove('scanning');
                 }
                 
+                // Clear all timers
                 clearInterval(this.sessionTimer);
                 if (this.fallbackTimer) clearInterval(this.fallbackTimer);
                 if (this.sensorUpdateTimer) clearInterval(this.sensorUpdateTimer);
+                if (this.wordGenerationTimer) clearInterval(this.wordGenerationTimer);
+                
+                // Reset EMF display
+                this.resetEMFDisplay();
+                
+                // Update status
+                const statusElement = document.getElementById('sessionStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Ready to scan...';
+                }
                 
                 this.hideCurrentWord();
                 console.log('Mobile scanning stopped');
+            }
+
+            resetEMFDisplay() {
+                // Turn off all EMF lights
+                const lights = document.querySelectorAll('.emf-light');
+                lights.forEach(light => {
+                    light.classList.remove('active');
+                });
             }
 
             hideCurrentWord() {
@@ -1007,7 +1026,16 @@
                     wordCountElement.textContent = this.sessionStats.wordCount;
                 }
                 
+                this.lastWordTime = Date.now(); // Update last word time
+                
                 console.log(`Sensor-triggered word: ${selectedWord} (${category}) - Intensity: ${sensorIntensity.toFixed(2)}`);
+            }
+
+            generateSensorTriggeredWord() {
+                // Only generate words if actively scanning
+                if (!this.isScanning) return;
+                
+                this.generateWord();
             }
             
             calculateSensorIntensity() {
@@ -1176,6 +1204,9 @@
             }
 
             checkSensorTrigger(emfReading) {
+                // Only trigger words if actively scanning
+                if (!this.isScanning) return;
+                
                 // Check if EMF reading triggers word generation
                 if (emfReading > 50 && Date.now() - this.lastWordTime > this.wordCooldown) {
                     this.generateSensorTriggeredWord();
