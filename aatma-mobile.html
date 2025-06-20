@@ -656,6 +656,19 @@
                     time: ['now', 'then', 'before', 'after', 'past', 'future', 'today', 'yesterday', 'tomorrow'],
                     family: ['mother', 'father', 'child', 'family', 'home', 'together', 'alone', 'memory']
                 };
+
+                // Initialize sensor readings structure
+                this.sensorReadings = {
+                    accelerometer: { x: 0, y: 0, z: 0 },
+                    magnetometer: { x: 0, y: 0, z: 0 },
+                    gyroscope: { x: 0, y: 0, z: 0 }
+                };
+
+                this.baseline = {
+                    accelerometer: { x: 0, y: 0, z: 0 },
+                    magnetometer: { x: 0, y: 0, z: 0 },
+                    gyroscope: { x: 0, y: 0, z: 0 }
+                };
                 
                 this.initializeApp();
             }
@@ -990,8 +1003,8 @@
                     return 0; // No baseline yet
                 }
                 
-                const accel = this.currentSensorData.accelerometer;
-                const mag = this.currentSensorData.magnetometer;
+                const accel = this.sensorReadings.accelerometer;
+                const mag = this.sensorReadings.magnetometer;
                 
                 // Calculate magnitude of accelerometer changes from baseline
                 const accelMagnitude = Math.sqrt(
@@ -1007,13 +1020,24 @@
                     Math.pow(mag.z - this.baseline.magnetometer.z, 2)
                 );
                 
-                // Normalize magnetometer reading (device orientation values are in degrees)
-                const normalizedMagMagnitude = magMagnitude / 180.0;
-                
                 // Combine readings with weights - accelerometer for movement, magnetometer for EMF
-                const intensity = (accelMagnitude * 0.4 + normalizedMagMagnitude * 0.6);
+                const intensity = (accelMagnitude * 0.4 + magMagnitude * 0.6);
                 
                 return intensity;
+            }
+
+            establishBaseline() {
+                this.baseline.accelerometer = {
+                    x: this.sensorReadings.accelerometer.x,
+                    y: this.sensorReadings.accelerometer.y,
+                    z: this.sensorReadings.accelerometer.z
+                };
+                this.baseline.magnetometer = {
+                    x: this.sensorReadings.magnetometer.x,
+                    y: this.sensorReadings.magnetometer.y,
+                    z: this.sensorReadings.magnetometer.z
+                };
+                console.log('Baseline established:', this.baseline);
             }
             
 
@@ -1029,7 +1053,7 @@
             
             hashSensorData() {
                 // Create consistent hash from current sensor readings
-                const data = `${this.currentSensorData.accelerometer.x.toFixed(3)},${this.currentSensorData.accelerometer.y.toFixed(3)},${this.currentSensorData.magnetometer.x.toFixed(3)}`;
+                const data = `${this.sensorReadings.accelerometer.x.toFixed(3)},${this.sensorReadings.accelerometer.y.toFixed(3)},${this.sensorReadings.magnetometer.x.toFixed(3)}`;
                 let hash = 0;
                 for (let i = 0; i < data.length; i++) {
                     const char = data.charCodeAt(i);
@@ -1136,6 +1160,36 @@
                 
                 // Check for sensor-triggered word generation
                 this.checkSensorTrigger(emfReading);
+            }
+
+            checkSensorTrigger(emfReading) {
+                // Check if EMF reading triggers word generation
+                if (emfReading > 50 && Date.now() - this.lastWordTime > this.wordCooldown) {
+                    this.generateSensorTriggeredWord();
+                }
+            }
+
+            generateWord() {
+                // Simple word generation for fallback
+                const categories = Object.keys(this.wordBank);
+                const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                const words = this.wordBank[randomCategory];
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                
+                this.displayWord(randomWord, randomCategory);
+                this.speakWord(randomWord);
+                this.lastWordTime = Date.now();
+            }
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.sessionTime / 60);
+                const seconds = this.sessionTime % 60;
+                const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                const timerElement = document.getElementById('sessionTimer');
+                if (timerElement) {
+                    timerElement.textContent = timeStr;
+                }
             }
             
             requestDeviceSensors() {
