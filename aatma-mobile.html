@@ -916,16 +916,11 @@
                 this.sensorTriggerThreshold = 0.02; // Lower threshold for better sensitivity
                 this.wordCooldown = 3000; // 3 seconds between words minimum
                 
-                console.log('Scanning started - Real device sensors active');
-                        this.lastWordTime = Date.now();
-                    }
-                }, 25000); // Check every 25 seconds
-                
                 this.sensorUpdateTimer = setInterval(() => {
                     this.updateSensorReadings();
                 }, 500);
                 
-                console.log('Mobile scanning started');
+                console.log('Scanning started - Real device sensors active');
             }
             
             stopScanning() {
@@ -1488,7 +1483,45 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 window.aatmaDevice = new AatmaMobile();
+                aatmaDevice = window.aatmaDevice; // Set global reference
                 console.log('Mobile app initialized successfully');
+                
+                // Add direct event listeners as backup
+                const forceWordBtn = document.querySelector('.test-word-btn');
+                if (forceWordBtn) {
+                    forceWordBtn.addEventListener('click', () => {
+                        console.log('Force Word button clicked');
+                        if (window.aatmaDevice) {
+                            window.aatmaDevice.forceWordGeneration();
+                        }
+                    });
+                }
+                
+                const testSpeechBtn = document.querySelector('.test-speech-btn');
+                if (testSpeechBtn) {
+                    testSpeechBtn.addEventListener('click', () => {
+                        console.log('Test Speech button clicked');
+                        if (window.aatmaDevice) {
+                            window.aatmaDevice.testSpeech();
+                        }
+                    });
+                }
+                
+                const scanBtn = document.getElementById('scanButton');
+                if (scanBtn) {
+                    scanBtn.addEventListener('click', () => {
+                        console.log('Scan button clicked');
+                        if (window.aatmaDevice) {
+                            window.aatmaDevice.toggleScanning();
+                        }
+                    });
+                }
+                
+                // Test button functionality
+                console.log('Testing button functions...');
+                console.log('forceWordGeneration exists:', typeof forceWordGeneration === 'function');
+                console.log('testSpeech exists:', typeof testSpeech === 'function');
+                console.log('toggleScanning exists:', typeof toggleScanning === 'function');
             } catch (error) {
                 console.log('Initialization error:', error);
             }
