@@ -551,6 +551,12 @@
                 </div>
 
                 <div class="middle-word-area">
+                    <!-- Permission Alert for iOS -->
+                    <div class="permission-alert" id="permissionAlert" style="display: none;">
+                        <p style="margin: 0 0 10px 0; color: var(--text-primary);">Enable device sensors for EMF detection</p>
+                        <button class="permission-btn" onclick="requestSensorPermission()">Enable Sensors</button>
+                    </div>
+                    
                     <div class="word-display" id="wordDisplay">
                         <div class="current-word" id="currentWord"></div>
                         <div class="word-category" id="wordCategory"></div>
@@ -654,26 +660,205 @@
                 this.initializeApp();
             }
             
-            initializeApp() {
-                this.checkSensorSupport();
+            async initializeApp() {
+                await this.checkSensorSupport();
+                this.showPermissionAlertIfNeeded();
                 console.log('Aatma Mobile v1.0 initialized');
             }
+
+            showPermissionAlertIfNeeded() {
+                // Show permission alert on iOS devices that need explicit permission
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const needsPermission = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
+                
+                if (isIOS && needsPermission) {
+                    const permissionAlert = document.getElementById('permissionAlert');
+                    if (permissionAlert) {
+                        permissionAlert.style.display = 'block';
+                    }
+                }
+            }
             
-            checkSensorSupport() {
-                // Sensors automatically enabled when scanning starts
-                console.log('Mobile sensors initialized');
+            async checkSensorSupport() {
+                this.sensors = {
+                    accelerometer: null,
+                    magnetometer: null,
+                    gyroscope: null,
+                    deviceMotion: false,
+                    deviceOrientation: false
+                };
+
+                // Request device motion/orientation permissions for iOS 13+
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceMotionEvent.requestPermission();
+                        this.sensors.deviceMotion = permission === 'granted';
+                        console.log('Device motion permission:', permission);
+                    } catch (error) {
+                        console.log('Error requesting device motion permission:', error);
+                    }
+                }
+
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        this.sensors.deviceOrientation = permission === 'granted';
+                        console.log('Device orientation permission:', permission);
+                    } catch (error) {
+                        console.log('Error requesting device orientation permission:', error);
+                    }
+                }
+
+                // Check for Web API sensor support
+                if ('Accelerometer' in window) {
+                    try {
+                        this.sensors.accelerometer = new Accelerometer({ frequency: 10 });
+                        console.log('Accelerometer API available');
+                    } catch (error) {
+                        console.log('Accelerometer not available:', error);
+                    }
+                }
+
+                if ('Magnetometer' in window) {
+                    try {
+                        this.sensors.magnetometer = new Magnetometer({ frequency: 10 });
+                        console.log('Magnetometer API available');
+                    } catch (error) {
+                        console.log('Magnetometer not available:', error);
+                    }
+                }
+
+                // Initialize baseline sensor readings
+                this.baseline = {
+                    accelerometer: { x: 0, y: 0, z: 0 },
+                    magnetometer: { x: 0, y: 0, z: 0 },
+                    gyroscope: { x: 0, y: 0, z: 0 }
+                };
+
+                this.currentSensorData = {
+                    accelerometer: { x: 0, y: 0, z: 0 },
+                    magnetometer: { x: 0, y: 0, z: 0 },
+                    gyroscope: { x: 0, y: 0, z: 0 },
+                    timestamp: Date.now()
+                };
+
+                console.log('Mobile sensors initialized with capabilities:', this.sensors);
             }
             
             startSensorMonitoring() {
+                // Start device motion and orientation listeners
                 if ('DeviceMotionEvent' in window) {
                     window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
+                    console.log('Device motion listener added');
                 }
+                
+                if ('DeviceOrientationEvent' in window) {
+                    window.addEventListener('deviceorientation', this.handleDeviceOrientation.bind(this));
+                    console.log('Device orientation listener added');
+                }
+
+                // Start Web API sensors if available
+                if (this.sensors.accelerometer) {
+                    try {
+                        this.sensors.accelerometer.addEventListener('reading', () => {
+                            this.currentSensorData.accelerometer = {
+                                x: this.sensors.accelerometer.x || 0,
+                                y: this.sensors.accelerometer.y || 0,
+                                z: this.sensors.accelerometer.z || 0
+                            };
+                        });
+                        this.sensors.accelerometer.start();
+                        console.log('Web API Accelerometer started');
+                    } catch (error) {
+                        console.log('Failed to start Web API accelerometer:', error);
+                    }
+                }
+
+                if (this.sensors.magnetometer) {
+                    try {
+                        this.sensors.magnetometer.addEventListener('reading', () => {
+                            this.currentSensorData.magnetometer = {
+                                x: this.sensors.magnetometer.x || 0,
+                                y: this.sensors.magnetometer.y || 0,
+                                z: this.sensors.magnetometer.z || 0
+                            };
+                        });
+                        this.sensors.magnetometer.start();
+                        console.log('Web API Magnetometer started');
+                    } catch (error) {
+                        console.log('Failed to start Web API magnetometer:', error);
+                    }
+                }
+
+                // Establish baseline readings after 2 seconds
+                setTimeout(() => {
+                    this.establishBaseline();
+                }, 2000);
+
                 console.log('Sensor monitoring started');
             }
             
             handleDeviceMotion(event) {
                 if (!this.isScanning) return;
-                this.updateEnvironmentalData(event);
+                
+                // Update sensor data from device motion
+                if (event.acceleration) {
+                    this.currentSensorData.accelerometer = {
+                        x: event.acceleration.x || 0,
+                        y: event.acceleration.y || 0,
+                        z: event.acceleration.z || 0
+                    };
+                }
+                
+                if (event.rotationRate) {
+                    this.currentSensorData.gyroscope = {
+                        x: event.rotationRate.alpha || 0,
+                        y: event.rotationRate.beta || 0,
+                        z: event.rotationRate.gamma || 0
+                    };
+                }
+                
+                this.currentSensorData.timestamp = Date.now();
+                this.processSensorData();
+            }
+
+            handleDeviceOrientation(event) {
+                if (!this.isScanning) return;
+                
+                // Use device orientation as magnetometer approximation
+                this.currentSensorData.magnetometer = {
+                    x: event.alpha || 0,  // Compass heading
+                    y: event.beta || 0,   // Tilt front/back
+                    z: event.gamma || 0   // Tilt left/right
+                };
+                
+                this.currentSensorData.timestamp = Date.now();
+            }
+
+            establishBaseline() {
+                this.baseline = {
+                    accelerometer: { ...this.currentSensorData.accelerometer },
+                    magnetometer: { ...this.currentSensorData.magnetometer },
+                    gyroscope: { ...this.currentSensorData.gyroscope }
+                };
+                console.log('Baseline established:', this.baseline);
+            }
+
+            processSensorData() {
+                const intensity = this.calculateSensorIntensity();
+                
+                // Update EMF visualization
+                this.updateEMFDisplay(intensity * 100);
+                
+                // Check if sensor change is significant enough to trigger word
+                if (intensity > (this.sensitivity / 100) * 0.1) {
+                    this.generateSensorTriggeredWord();
+                }
+                
+                // Log sensor readings for debugging
+                if (Math.random() < 0.1) { // Log 10% of readings to avoid spam
+                    console.log('Sensor intensity:', intensity.toFixed(3), 'Threshold:', ((this.sensitivity / 100) * 0.1).toFixed(3));
+                }
             }
             
             updateEnvironmentalData(event) {
@@ -718,6 +903,9 @@
                 button.classList.add('scanning');
                 document.getElementById('sessionStatus').textContent = 'Scanning for Paranormal Activity...';
                 
+                // Start sensor monitoring for real device sensors
+                this.startSensorMonitoring();
+                
                 this.sessionTimer = setInterval(() => {
                     this.sessionTime++;
                     this.updateTimerDisplay();
@@ -725,14 +913,10 @@
                 
                 // Initialize sensor monitoring for word triggers
                 this.lastWordTime = 0;
-                this.sensorTriggerThreshold = 0.3; // Minimum intensity to trigger word
-                this.wordCooldown = 5000; // 5 seconds between words minimum
+                this.sensorTriggerThreshold = 0.02; // Lower threshold for better sensitivity
+                this.wordCooldown = 3000; // 3 seconds between words minimum
                 
-                // Fallback word generation for testing (when no paranormal activity detected)
-                this.fallbackTimer = setInterval(() => {
-                    if (Date.now() - this.lastWordTime > 20000) { // If no words for 20 seconds
-                        console.log('Fallback word generation - no paranormal activity detected');
-                        this.generateWord();
+                console.log('Scanning started - Real device sensors active');
                         this.lastWordTime = Date.now();
                     }
                 }, 25000); // Check every 25 seconds
@@ -807,13 +991,12 @@
             
             calculateSensorIntensity() {
                 // Ensure baseline is established
-                if (!this.baseline.accelerometer.x) {
-                    this.establishBaseline();
-                    return 0;
+                if (!this.baseline.accelerometer.x && this.baseline.accelerometer.x !== 0) {
+                    return 0; // No baseline yet
                 }
                 
-                const accel = this.sensorReadings.accelerometer;
-                const mag = this.sensorReadings.magnetometer;
+                const accel = this.currentSensorData.accelerometer;
+                const mag = this.currentSensorData.magnetometer;
                 
                 // Calculate magnitude of accelerometer changes from baseline
                 const accelMagnitude = Math.sqrt(
@@ -829,26 +1012,16 @@
                     Math.pow(mag.z - this.baseline.magnetometer.z, 2)
                 );
                 
-                // Combine readings with weights and apply sensitivity
-                const intensity = (accelMagnitude * 0.3 + magMagnitude * 0.7);
-                console.log(`Sensor intensity: ${intensity.toFixed(3)}, Sensitivity: ${this.sensitivity}`);
+                // Normalize magnetometer reading (device orientation values are in degrees)
+                const normalizedMagMagnitude = magMagnitude / 180.0;
+                
+                // Combine readings with weights - accelerometer for movement, magnetometer for EMF
+                const intensity = (accelMagnitude * 0.4 + normalizedMagMagnitude * 0.6);
                 
                 return intensity;
             }
             
-            establishBaseline() {
-                this.baseline.accelerometer = {
-                    x: this.sensorReadings.accelerometer.x,
-                    y: this.sensorReadings.accelerometer.y,
-                    z: this.sensorReadings.accelerometer.z
-                };
-                this.baseline.magnetometer = {
-                    x: this.sensorReadings.magnetometer.x,
-                    y: this.sensorReadings.magnetometer.y,
-                    z: this.sensorReadings.magnetometer.z
-                };
-                console.log('Baseline established:', this.baseline);
-            }
+
             
             selectCategoryBySensorData(intensity) {
                 // Map sensor intensity to paranormal categories
@@ -861,7 +1034,7 @@
             
             hashSensorData() {
                 // Create consistent hash from current sensor readings
-                const data = `${this.sensorReadings.accelerometer.x.toFixed(3)},${this.sensorReadings.accelerometer.y.toFixed(3)},${this.sensorReadings.magnetometer.x.toFixed(3)}`;
+                const data = `${this.currentSensorData.accelerometer.x.toFixed(3)},${this.currentSensorData.accelerometer.y.toFixed(3)},${this.currentSensorData.magnetometer.x.toFixed(3)}`;
                 let hash = 0;
                 for (let i = 0; i < data.length; i++) {
                     const char = data.charCodeAt(i);
@@ -1106,11 +1279,94 @@
                 
                 console.log(`Sensitivity adjusted to: ${this.sensitivity}%`);
             }
+
+            forceWordGeneration() {
+                const categories = Object.keys(this.wordBank);
+                const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                const words = this.wordBank[randomCategory];
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                
+                this.displayWord(randomWord, randomCategory);
+                this.speakWord(randomWord);
+                
+                this.sessionStats.wordCount++;
+                const wordCountElement = document.getElementById('wordCount');
+                if (wordCountElement) {
+                    wordCountElement.textContent = this.sessionStats.wordCount;
+                }
+                
+                console.log(`Force generated word: ${randomWord} (${randomCategory})`);
+            }
+
+            testSpeech() {
+                const testPhrase = "Aatma communication system active";
+                this.speakWord(testPhrase);
+                console.log('Testing speech synthesis');
+            }
+
+            async requestSensorPermission() {
+                console.log('Requesting sensor permissions...');
+                
+                // Request device motion permission for iOS 13+
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    try {
+                        const motionPermission = await DeviceMotionEvent.requestPermission();
+                        console.log('Device motion permission:', motionPermission);
+                        
+                        if (motionPermission === 'granted') {
+                            this.sensors.deviceMotion = true;
+                            this.startSensorMonitoring();
+                            
+                            // Hide permission alert
+                            const permissionAlert = document.getElementById('permissionAlert');
+                            if (permissionAlert) {
+                                permissionAlert.style.display = 'none';
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Error requesting device motion permission:', error);
+                    }
+                }
+                
+                // Request device orientation permission for iOS 13+
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const orientationPermission = await DeviceOrientationEvent.requestPermission();
+                        console.log('Device orientation permission:', orientationPermission);
+                        
+                        if (orientationPermission === 'granted') {
+                            this.sensors.deviceOrientation = true;
+                        }
+                    } catch (error) {
+                        console.log('Error requesting device orientation permission:', error);
+                    }
+                }
+                
+                console.log('Permission requests completed');
+            }
         }
 
         // Global functions for HTML onclick events
         function requestSensorPermission() {
-            aatmaDevice.requestSensorPermission();
+            if (window.aatmaDevice) {
+                window.aatmaDevice.requestSensorPermission();
+            }
+        }
+
+        function forceWordGeneration() {
+            if (window.aatmaDevice) {
+                window.aatmaDevice.forceWordGeneration();
+            } else {
+                console.log('Device not initialized');
+            }
+        }
+
+        function testSpeech() {
+            if (window.aatmaDevice) {
+                window.aatmaDevice.testSpeech();
+            } else {
+                console.log('Device not initialized');
+            }
         }
 
         // Global functions for button events
