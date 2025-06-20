@@ -797,7 +797,10 @@
                 this.speakWord(selectedWord);
                 
                 this.sessionStats.wordCount++;
-                document.getElementById('wordCount').textContent = this.sessionStats.wordCount;
+                const wordCountElement = document.getElementById('wordCount');
+                if (wordCountElement) {
+                    wordCountElement.textContent = this.sessionStats.wordCount;
+                }
                 
                 console.log(`Sensor-triggered word: ${selectedWord} (${category}) - Intensity: ${sensorIntensity.toFixed(2)}`);
             }
@@ -1070,14 +1073,30 @@
                 }
                 
                 const avgEmf = this.sessionStats.emfReadings.reduce((a, b) => a + b, 0) / this.sessionStats.emfReadings.length;
-                document.getElementById('avgEmf').textContent = Math.round(avgEmf);
-                document.getElementById('anomalyCount').textContent = this.sessionStats.anomalyCount;
+                
+                const avgEmfElement = document.getElementById('avgEmf');
+                if (avgEmfElement) {
+                    avgEmfElement.textContent = Math.round(avgEmf);
+                }
+                
+                const anomalyCountElement = document.getElementById('anomalyCount');
+                if (anomalyCountElement) {
+                    anomalyCountElement.textContent = this.sessionStats.anomalyCount;
+                }
             }
             
             adjustSensitivity(delta) {
                 this.sensitivity = Math.max(10, Math.min(100, this.sensitivity + delta));
-                document.getElementById('sensitivityValue').textContent = this.sensitivity + '%';
-                document.getElementById('sensitivityFill').style.width = this.sensitivity + '%';
+                
+                const sensitivityValueElement = document.getElementById('sensitivityValue');
+                if (sensitivityValueElement) {
+                    sensitivityValueElement.textContent = this.sensitivity + '%';
+                }
+                
+                const sensitivityFillElement = document.getElementById('sensitivityFill');
+                if (sensitivityFillElement) {
+                    sensitivityFillElement.style.width = this.sensitivity + '%';
+                }
                 
                 // Update hardcoded sensitivity display in settings
                 const settingsText = document.querySelector('#tab3 div:last-child p:nth-child(2)');
